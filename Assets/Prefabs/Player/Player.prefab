@@ -229,16 +229,16 @@ MonoBehaviour:
   rotationHandler:
     hitOnlyLayers:
       serializedVersion: 2
-      m_Bits: 0
-    rotationSpeed: 0
-    pointerOnWorld: {fileID: 0}
+      m_Bits: 64
+    rotationSpeed: 3
+    pointerOnWorld: {fileID: 3463769139436717853}
   jumpHandler:
     rigidbody: {fileID: 1195192574434181921}
-    jumpForce: 1
+    jumpForce: 7
     jumpCutMultiplier: 0.3
     jumpableLayer:
       serializedVersion: 2
-      m_Bits: 2147483647
+      m_Bits: 64
     groundCheck: {fileID: 5090573910513390467}
     groundCheckSize: 0.05
   speed: 5
