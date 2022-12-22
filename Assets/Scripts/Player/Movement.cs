@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
+    private float playerYSize;
     [Header("Components")]
     [SerializeField]
     private PlayerRotation rotationHandler;
@@ -11,6 +12,12 @@ public class Movement : MonoBehaviour
     [Header("Config")]
     [SerializeField]
     private float speed;
+    [SerializeField]
+    private float wallCheckSize;
+    [SerializeField]
+    private LayerMask wallLayer;
+
+    private const float COLLISION_DECTECTION_DISTANCE_OFFSET = 0.6f;
     private const float SIDEWAYS_PENALTY = 2f;
 
     private void OnValidate()
@@ -20,6 +27,7 @@ public class Movement : MonoBehaviour
 
     private void Start()
     {
+        playerYSize = GetComponent<MeshRenderer>().bounds.size.y;
         rotationHandler.Init();
         jumpHandler.Init();
     }
@@ -40,7 +48,10 @@ public class Movement : MonoBehaviour
     private void MovePlayer()
     {
         rotationHandler.GetRotation(transform);
-        transform.Translate(speed * Time.deltaTime * GetMovementInput());
+        if (!IsCollidingWithWall())
+        {
+            transform.Translate(speed * Time.deltaTime * GetMovementInput());
+        }
     }
 
     /// <summary>
@@ -57,9 +68,27 @@ public class Movement : MonoBehaviour
         return resultingMovement;
     }
 
+    private bool IsCollidingWithWall()
+    {
+        return Physics.CheckSphere(GetRotationOffsetInput() + transform.position, wallCheckSize, wallLayer);
+    }
+
+    /// <summary>
+    /// Get the rotation from the player and modify the input to be in the right position.
+    /// </summary>
+    /// <returns>Input movement direction</returns>
+    private Vector3 GetRotationOffsetInput()
+    {
+        Vector3 targetPos = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z) * GetMovementInput();
+        targetPos *= COLLISION_DECTECTION_DISTANCE_OFFSET;
+        return targetPos;
+    }
+
     private void OnDrawGizmos()
     {
         jumpHandler.OnGizmos();
+
+        Gizmos.DrawSphere(transform.position + GetRotationOffsetInput() + -transform.up, wallCheckSize);
     }
 
     /// <summary>

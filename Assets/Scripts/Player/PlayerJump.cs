@@ -7,6 +7,21 @@ public class PlayerJump
 {
     private bool isJumping;
 
+    #region Coyote Time
+
+    private float timeSinceGrounded;
+    private bool isCoyoteTime => timeSinceGrounded > 0;
+
+    #endregion
+
+    #region Jump Buffer
+
+    private float jumpBufferTime = 0.2f;
+    private float timeSinceJump;
+    private bool isInJumpTime => timeSinceJump > 0f;
+
+    #endregion
+
     [Header("Dependencies")]
     [SerializeField]
     private Rigidbody rigidbody;
@@ -43,6 +58,12 @@ public class PlayerJump
     private float groundCheckSize = 0.05f;
 
     /// <summary>
+    /// Duration where player is allowed to jump after leaving platform
+    /// </summary>
+    [SerializeField]
+    private float coyoteTime = 0.2f;
+
+    /// <summary>
     /// Initializes class
     /// </summary>
     public void Init()
@@ -66,10 +87,14 @@ public class PlayerJump
     /// </summary>
     public void HandleJump()
     {
-        if (IsPlayerOnGround() && !isJumping && Input.GetKeyDown(KeyCode.Space))
+        isJumping = IsPlayerOnGround();
+        UpdateJumpBuffer();
+
+        if (isCoyoteTime && isInJumpTime)
         {
             Jump();
         }
+
         if (Input.GetKeyUp(KeyCode.Space) && isJumping)
         {
             StopJumping();
@@ -83,8 +108,29 @@ public class PlayerJump
     private bool IsPlayerOnGround()
     {
         bool isTouchingGround = Physics.CheckSphere(groundCheck.position, groundCheckSize, jumpableLayer);
-        isJumping = !isTouchingGround;
+
+        if (isTouchingGround)
+        {
+            timeSinceGrounded = coyoteTime;
+        }
+        else
+        {
+            timeSinceGrounded -= Time.deltaTime;
+        }
+
         return isTouchingGround;
+    }
+
+    private void UpdateJumpBuffer()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            timeSinceJump = jumpBufferTime;
+        }
+        else
+        {
+            timeSinceJump -= Time.deltaTime;
+        }
     }
 
     /// <summary>
@@ -92,7 +138,7 @@ public class PlayerJump
     /// </summary>
     private void Jump()
     {
-        isJumping = true;
+        timeSinceJump = 0;
         rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
@@ -101,7 +147,7 @@ public class PlayerJump
     /// </summary>
     private void StopJumping()
     {
-        if(rigidbody.velocity.y > 0)
+        if (rigidbody.velocity.y > 0)
         {
             rigidbody.AddForce((1 - jumpCutMultiplier) * rigidbody.velocity.y * Vector3.down, ForceMode.Impulse);
         }
