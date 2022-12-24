@@ -9,7 +9,7 @@ public class Timer
 
     [Header("Config")]
     [SerializeField] private float targetTime = 1;
-    public float TotalTime { get { return targetTime; } }
+    public float TargetTime { get { return targetTime; } }
     public float CurrentTime { get; private set; }
     public bool IsTimerDone { get; private set; }
 
@@ -143,5 +143,38 @@ public class Timer
         SetCurrentTime(0f);
         // Debug.Log($"Timer has finished! Can be started again. Time runned: {totalTime}");
         yield return null;
+    }
+
+    /// <summary>
+    /// Normalizes 'alpha' with the total duration. Modified to work with fractions.
+    /// </summary>
+    /// <param name="alpha">Value to normalize</param>
+    /// <param name="duration">Max value of the normalize formula</param>
+    /// <returns>A value in between 0 and 1, the duration being 1</returns>
+    private float NormalizeTime(float alpha, float duration)
+    {
+        // 1 is added to everything to avoid dividing under 0 and getting unexpected values
+        int minValue = 1;
+        alpha += minValue;
+        duration += minValue;
+        return (alpha - minValue) / (duration - minValue);
+    }
+
+    /// <summary>
+    /// Returns the current time normalized going from 0-1.
+    /// </summary>
+    /// <returns>Current time normalized to be 0-1</returns>
+    public float GetTimeNormalized()
+    {
+        return NormalizeTime(CurrentTime, TargetTime);
+    }
+
+    /// <summary>
+    /// Returns the current time normalized going from 1-0.
+    /// </summary>
+    /// <returns>Current time normalized to be 1-0</returns>
+    public float GetReversedTimeNormalized()
+    {
+        return NormalizeTime(TargetTime - CurrentTime, TargetTime);
     }
 }

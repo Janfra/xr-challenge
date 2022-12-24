@@ -2,9 +2,14 @@ using UnityEngine;
 
 public class CameraHandler : MonoBehaviour
 {
+    private Transform currentTarget;
+
     [Header("Dependencies")]
     [SerializeField]
     private Transform playerPosition;
+
+
+    #region Constants
 
     /// <summary>
     /// Distance kept from the cam to objects
@@ -15,23 +20,32 @@ public class CameraHandler : MonoBehaviour
     /// </summary>
     private const float CAM_HEIGHT = 4.151f;
 
+    #endregion
+
     private void Awake()
     {
-        Debug.Log(transform.position.y - playerPosition.position.y);
+        currentTarget = playerPosition;
     }
 
     private void LateUpdate()
     {
-        FollowPlayer();
+        if(currentTarget != null)
+        {
+            FollowTarget(currentTarget);
+        }
+        else
+        {
+            Debug.LogError("No target set for camera");
+        }
     }
 
     /// <summary>
     /// Follows player position while facing it
     /// </summary>
-    private void FollowPlayer()
+    private void FollowTarget(Transform _target)
     {
-        transform.position = GetCameraPositionOnTarget(playerPosition);
-        transform.LookAt(playerPosition);
+        transform.position = GetCameraPositionOnTarget(_target);
+        transform.LookAt(_target);
     }
 
     /// <summary>

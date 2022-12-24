@@ -4,8 +4,14 @@ using UnityEngine;
 
 public class FallingPlatform : MonoBehaviour
 {
+    #region Components
+
     private FallingStates currentState;
     private Timer timer;
+
+    #endregion
+
+    #region Dependencies
 
     [Header("Dependencies")]
     [SerializeField]
@@ -13,11 +19,17 @@ public class FallingPlatform : MonoBehaviour
     [SerializeField]
     private Collider platformCollider;
 
+    #endregion
+
+    #region Config
+
     [Header("Config")]
     [SerializeField]
     private UntouchedState untouchedState;
     [SerializeField]
     private FalledState falledState;
+
+    #endregion
 
     private void Awake()
     {
@@ -41,21 +53,6 @@ public class FallingPlatform : MonoBehaviour
         protected abstract IEnumerator RunStateLogic(FallingPlatform _caller);
         protected abstract void Init(FallingPlatform _caller);
         protected abstract void OnComplete(FallingPlatform _caller);
-
-        /// <summary>
-        /// Normalizes 'alpha' with the total duration. Modified to work with values under 0. Havent tested with negatives.
-        /// </summary>
-        /// <param name="alpha">Current value to normalize</param>
-        /// <param name="duration">Max value of the normalize formula</param>
-        /// <returns>A value in between 0 and 1, the duration being 1</returns>
-        protected float FractionNormalized(float alpha, float duration)
-        {
-            // 1 is added to everything to avoid dividing under 0 and getting unexpected values
-            int minValue = 1;
-            alpha += minValue;
-            duration += minValue;
-            return (alpha - minValue) / (duration - minValue);
-        }
     }
     
     [System.Serializable]
@@ -87,8 +84,7 @@ public class FallingPlatform : MonoBehaviour
                 Color color = _caller.meshRenderer.material.color;
                 while (!_caller.timer.IsTimerDone)
                 {
-                    float alpha = FractionNormalized(_caller.timer.TotalTime - _caller.timer.CurrentTime, _caller.timer.TotalTime);
-                    color.a = alpha;
+                    color.a = _caller.timer.GetReversedTimeNormalized();
                     _caller.meshRenderer.material.color = color;
                     yield return null;
                 }
@@ -105,19 +101,35 @@ public class FallingPlatform : MonoBehaviour
             _caller.currentState.StartStateLogic(_caller);
             isFalling = false;
         }
+
+        /// <summary>
+        /// Sets platform colour depending on duration till fall
+        /// </summary>
+        public void SetPlatformType()
+        {
+
+        }
     }
 
     [System.Serializable]
     private class FalledState : FallingStates
     {
+        #region Config
+
         [SerializeField]
         private float durationTillRegen = 1f;
         [SerializeField]
         private LayerMask layerSwap;
 
+        #endregion
+
+        #region Variables & Constants
+
         private int initialLayer;
         private bool isRegenerating;
         private const float TIMER_EXTENSION = 0.1f;
+  
+        #endregion
 
         public override void StartStateLogic(FallingPlatform _caller)
         {
@@ -142,8 +154,7 @@ public class FallingPlatform : MonoBehaviour
                 Color color = _caller.meshRenderer.material.color;
                 while (!_caller.timer.IsTimerDone)
                 {
-                    float alpha = FractionNormalized(_caller.timer.CurrentTime, _caller.timer.TotalTime);
-                    color.a = alpha;
+                    color.a = _caller.timer.GetTimeNormalized();
                     _caller.meshRenderer.material.color = color;
                     yield return null;
                 }

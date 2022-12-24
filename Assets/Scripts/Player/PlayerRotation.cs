@@ -3,11 +3,17 @@ using UnityEngine;
 [System.Serializable]
 public class PlayerRotation
 {
+    #region Dependencies
+
     [Header("Dependencies")]
     /// <summary>
     /// Camera used for rotation ray casting
     /// </summary>
     private Camera cam;
+
+    #endregion
+
+    #region Config
 
     [Header("Config")]
     /// <summary>
@@ -27,6 +33,8 @@ public class PlayerRotation
     /// </summary>
     [SerializeField] 
     private GameObject pointerOnWorld;
+
+    #endregion
 
     /// <summary>
     /// Initializes the class

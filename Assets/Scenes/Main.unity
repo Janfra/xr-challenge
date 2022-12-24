@@ -2068,12 +2068,17 @@ PrefabInstance:
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
       propertyPath: wallLayer.m_Bits
-      value: 64
+      value: 68
       objectReference: {fileID: 0}
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
       propertyPath: jumpHandler.jumpForce
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
+        type: 3}
+      propertyPath: movementHandler.speed
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
@@ -2097,13 +2102,28 @@ PrefabInstance:
       objectReference: {fileID: 1046719173}
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
+      propertyPath: movementHandler.transform
+      value: 
+      objectReference: {fileID: 1342394705}
+    - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
+        type: 3}
+      propertyPath: jumpHandler.jumpBufferTime
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
+        type: 3}
+      propertyPath: movementHandler.wallCheckSize
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
+        type: 3}
       propertyPath: rotation.hitOnlyLayers.m_Bits
       value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
       propertyPath: rotationHandler.rotationSpeed
-      value: 6
+      value: 1.13
       objectReference: {fileID: 0}
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
@@ -2113,12 +2133,27 @@ PrefabInstance:
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
       propertyPath: jumpHandler.jumpableLayer.m_Bits
-      value: 321
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
+        type: 3}
+      propertyPath: movementHandler.wallLayer.m_Bits
+      value: 68
       objectReference: {fileID: 0}
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
       propertyPath: rotationHandler.hitOnlyLayers.m_Bits
       value: 1024
+      objectReference: {fileID: 0}
+    - target: {fileID: 3463769139436717853, guid: 99369145c16aef04bbfd4728056e4cfb,
+        type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5426862032703865673, guid: 99369145c16aef04bbfd4728056e4cfb,
+        type: 3}
+      propertyPath: m_Layer
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8198941504301641064, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}

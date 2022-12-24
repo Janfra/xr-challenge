@@ -5,7 +5,9 @@ using UnityEngine;
 [System.Serializable]
 public class PlayerJump
 {
-    private bool isJumping;
+    #region Other Variables & Contants
+
+    private bool isPlayerOnGround;
 
     #region Coyote Time
 
@@ -16,15 +18,25 @@ public class PlayerJump
 
     #region Jump Buffer
 
-    private float jumpBufferTime = 0.2f;
+    private float timeDelayToJump;
     private float timeSinceJump;
-    private bool isInJumpTime => timeSinceJump > 0f;
+    private bool isInJumpTime => timeSinceJump > 0f && timeDelayToJump < 0;
+
+    private const float JUMP_DELAY = 0.25f;
 
     #endregion
+
+    #endregion
+
+    #region Dependencies
 
     [Header("Dependencies")]
     [SerializeField]
     private Rigidbody rigidbody;
+
+    #endregion
+
+    #region Config
 
     [Header("Config")]
     /// <summary>
@@ -37,6 +49,7 @@ public class PlayerJump
     /// Changes how fast player gets pulled down after it stops jumping
     /// </summary>
     [SerializeField]
+    [Range(0f, 1f)]
     private float jumpCutMultiplier = 0.5f;
 
     /// <summary>
@@ -64,6 +77,14 @@ public class PlayerJump
     private float coyoteTime = 0.2f;
 
     /// <summary>
+    /// Duration where the player will jump if the floor is hit after pressing jump button
+    /// </summary>
+    [SerializeField]
+    private float jumpBufferTime = 0.2f;
+
+    #endregion
+
+    /// <summary>
     /// Initializes class
     /// </summary>
     public void Init()
@@ -74,12 +95,15 @@ public class PlayerJump
         }
     }
 
-    /// <summary>
-    /// Clamps on editor changes
-    /// </summary>
-    public void OnValidate()
+    public void GetInputs()
     {
-        jumpCutMultiplier = Mathf.Clamp01(jumpCutMultiplier);
+        UpdateJumpBuffer();
+        IsPlayerOnGroundUpdate();
+
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            StopJumping();
+        }
     }
 
     /// <summary>
@@ -87,17 +111,9 @@ public class PlayerJump
     /// </summary>
     public void HandleJump()
     {
-        isJumping = IsPlayerOnGround();
-        UpdateJumpBuffer();
-
         if (isCoyoteTime && isInJumpTime)
         {
             Jump();
-        }
-
-        if (Input.GetKeyUp(KeyCode.Space) && isJumping)
-        {
-            StopJumping();
         }
     }
 
@@ -105,11 +121,11 @@ public class PlayerJump
     /// Checks if the player is colliding with an object marked as jumpable
     /// </summary>
     /// <returns>Is player touching the floor</returns>
-    private bool IsPlayerOnGround()
+    private void IsPlayerOnGroundUpdate()
     {
-        bool isTouchingGround = Physics.CheckSphere(groundCheck.position, groundCheckSize, jumpableLayer);
+        isPlayerOnGround = Physics.CheckSphere(groundCheck.position, groundCheckSize, jumpableLayer);
 
-        if (isTouchingGround)
+        if (isPlayerOnGround)
         {
             timeSinceGrounded = coyoteTime;
         }
@@ -117,10 +133,11 @@ public class PlayerJump
         {
             timeSinceGrounded -= Time.deltaTime;
         }
-
-        return isTouchingGround;
     }
 
+    /// <summary>
+    /// Updates the jump buffer variables, restarting it or substracting the timer
+    /// </summary>
     private void UpdateJumpBuffer()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -130,6 +147,7 @@ public class PlayerJump
         else
         {
             timeSinceJump -= Time.deltaTime;
+            timeDelayToJump -= Time.deltaTime;
         }
     }
 
@@ -139,6 +157,7 @@ public class PlayerJump
     private void Jump()
     {
         timeSinceJump = 0;
+        timeDelayToJump = JUMP_DELAY;
         rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
@@ -147,7 +166,7 @@ public class PlayerJump
     /// </summary>
     private void StopJumping()
     {
-        if (rigidbody.velocity.y > 0)
+        if (rigidbody.velocity.y > 0 && !isPlayerOnGround)
         {
             rigidbody.AddForce((1 - jumpCutMultiplier) * rigidbody.velocity.y * Vector3.down, ForceMode.Impulse);
         }

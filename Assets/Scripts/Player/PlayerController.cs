@@ -1,94 +1,51 @@
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
+    #region Other Variables
+    
     private float playerYSize;
+
+    #endregion
+
+    #region Components
+
     [Header("Components")]
     [SerializeField]
     private PlayerRotation rotationHandler;
     [SerializeField]
     private PlayerJump jumpHandler;
-
-    [Header("Config")]
     [SerializeField]
-    private float speed;
-    [SerializeField]
-    private float wallCheckSize;
-    [SerializeField]
-    private LayerMask wallLayer;
+    private PlayerMovement movementHandler;
 
-    private const float COLLISION_DECTECTION_DISTANCE_OFFSET = 0.6f;
-    private const float SIDEWAYS_PENALTY = 2f;
-
-    private void OnValidate()
-    {
-        jumpHandler.OnValidate();
-    }
+    #endregion
 
     private void Start()
     {
         playerYSize = GetComponent<MeshRenderer>().bounds.size.y;
+        movementHandler.Init(transform);
         rotationHandler.Init();
         jumpHandler.Init();
     }
 
     private void Update()
     {
-        jumpHandler.HandleJump();
+        jumpHandler.GetInputs();
+        movementHandler.GetInputs();
+        rotationHandler.GetRotation(transform);
     }
 
     void FixedUpdate()
     {
-        MovePlayer();
-    }
-
-    /// <summary>
-    /// Moves the player using the inputs.
-    /// </summary>
-    private void MovePlayer()
-    {
-        rotationHandler.GetRotation(transform);
-        if (!IsCollidingWithWall())
-        {
-            transform.Translate(speed * Time.deltaTime * GetMovementInput());
-        }
-    }
-
-    /// <summary>
-    /// Get the inputs for movement based on player, add them and normalise them for consistency.
-    /// </summary>
-    /// <returns>Normalised player movement</returns>
-    private Vector3 GetMovementInput()
-    {
-        Vector3 forwardMove = speed * Input.GetAxisRaw("Vertical") * Vector3.forward;
-        Vector3 lateralMove = speed / SIDEWAYS_PENALTY * Input.GetAxisRaw("Horizontal") * Vector3.right;
-        Vector3 resultingMovement = forwardMove + lateralMove;
-        resultingMovement.Normalize();
-
-        return resultingMovement;
-    }
-
-    private bool IsCollidingWithWall()
-    {
-        return Physics.CheckSphere(GetRotationOffsetInput() + transform.position, wallCheckSize, wallLayer);
-    }
-
-    /// <summary>
-    /// Get the rotation from the player and modify the input to be in the right position.
-    /// </summary>
-    /// <returns>Input movement direction</returns>
-    private Vector3 GetRotationOffsetInput()
-    {
-        Vector3 targetPos = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z) * GetMovementInput();
-        targetPos *= COLLISION_DECTECTION_DISTANCE_OFFSET;
-        return targetPos;
+        jumpHandler.HandleJump();
+        movementHandler.HandleMovement();
     }
 
     private void OnDrawGizmos()
     {
         jumpHandler.OnGizmos();
 
-        Gizmos.DrawSphere(transform.position + GetRotationOffsetInput() + -transform.up, wallCheckSize);
+        movementHandler.OnGizmos();
     }
 
     /// <summary>

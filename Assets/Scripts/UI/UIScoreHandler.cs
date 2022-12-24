@@ -21,6 +21,10 @@ public class UIScoreHandler : MonoBehaviour
         PickupSystem.OnPickUpUIUpdate += UpdateScore;
     }
 
+    /// <summary>
+    /// Updates the score UI
+    /// </summary>
+    /// <param name="_newScore"></param>
     private void UpdateScore(float _newScore)
     {
         uiText.text = $"SCORE: {_newScore}";   
