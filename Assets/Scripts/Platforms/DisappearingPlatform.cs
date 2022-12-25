@@ -53,7 +53,7 @@ public class DisappearingPlatform : MonoBehaviour
 
     private void OnValidate()
     {
-        disappearedState.CheckLayerIndex();
+        disappearedState.OnValidate();
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -242,24 +242,9 @@ public class DisappearingPlatform : MonoBehaviour
             isRegenerating = false;
         }
 
-        public void CheckLayerIndex()
+        public void OnValidate()
         {
-            if(layerSwapIndex > 0 && layerSwapIndex < 32)
-            {
-                string layerSelected = LayerMask.LayerToName(layerSwapIndex);
-                if(layerSelected.Length > 0)
-                {
-                    Debug.Log($"Selected layer: {layerSelected}");
-                }
-                else
-                {
-                    Debug.Log($"Layer not found");
-                }
-            }
-            else
-            {
-                layerSwapIndex = 0;
-            }
+            LayerCheck.CheckLayerIndex(ref layerSwapIndex);
         }
     }
 
