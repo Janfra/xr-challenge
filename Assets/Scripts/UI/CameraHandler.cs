@@ -182,9 +182,11 @@ public class CameraHandler : MonoBehaviour
     private void RemoveUnalignedObjects(GameObject _gameObject)
     {
         List<GameObject> removedObjects = new List<GameObject>();
+        float targetXPos = _gameObject.transform.position.x;
+
         foreach (GameObject coveringObject in coveringObjects)
         {
-            if (coveringObject.transform.position.x != _gameObject.transform.position.x)
+            if (coveringObject.transform.position.x != targetXPos)
             {
                 removedObjects.Add(coveringObject);
             }
