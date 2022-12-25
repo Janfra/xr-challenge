@@ -1,27 +1,28 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LevelCompleteArea : MonoBehaviour
+public class RocketEndArea : MonoBehaviour
 {
     [Header("Dependencies")]
     [SerializeField]
-    private List<Pickup> pickupsNeeded;
+    private List<Pickup> pickupsSubscribedTo;
     
     [Header("Variables")]
-    private List<Pickup> pickupsCollectedList;
+    private List<Pickup> pickupsActivated;
     private int pickupsCollectedCount;
 
     private void Awake()
     {
-        pickupsCollectedList = new List<Pickup>();
+        pickupsActivated = new List<Pickup>();
 
         List<Pickup> pickupDuplicatesCheck = new List<Pickup>();
-        foreach (Pickup pickup in pickupsNeeded)
+        foreach (Pickup pickup in pickupsSubscribedTo)
         {
             if (pickupDuplicatesCheck.Contains(pickup))
             {
-                pickupsNeeded.Remove(pickup);
+                pickupsSubscribedTo.Remove(pickup);
                 Debug.LogWarning($"{pickup.name} was added twice to the pickups required to win!");
                 return;
             }
@@ -30,7 +31,7 @@ public class LevelCompleteArea : MonoBehaviour
     }
     private void Start()
     {
-        foreach (Pickup pickup in pickupsNeeded)
+        foreach (Pickup pickup in pickupsSubscribedTo)
         {
             pickup.OnPickUp += PickupCollected;
         }
@@ -45,7 +46,7 @@ public class LevelCompleteArea : MonoBehaviour
         }
         else if (!AreAllPickupsCollected())
         {
-            OnScreenMessagesHandler.SetScreenMessage($"You still need to collect {pickupsNeeded.Count} stars!");
+            OnScreenMessagesHandler.SetScreenMessage($"You still need to collect {pickupsSubscribedTo.Count} stars!");
         }
     }
 
@@ -59,29 +60,34 @@ public class LevelCompleteArea : MonoBehaviour
 
     private bool AreAllPickupsCollected()
     {
-        return pickupsCollectedCount == pickupsNeeded.Count;
+        return pickupsCollectedCount == pickupsSubscribedTo.Count;
     }
 
     private void PickupCollected(Pickup _pickup)
     {
-        if (pickupsCollectedList.Contains(_pickup))
+        if (pickupsActivated.Contains(_pickup))
         {
             return;
         }
 
-        pickupsCollectedList.Add(_pickup);
+        pickupsActivated.Add(_pickup);
         pickupsCollectedCount++;
-        pickupsCollectedCount = Mathf.Clamp(pickupsCollectedCount, 0, pickupsNeeded.Count);
+        pickupsCollectedCount = Mathf.Clamp(pickupsCollectedCount, 0, pickupsSubscribedTo.Count);
     }
 
+
+    /// <summary>
+    /// In case of instantiating pickups, be able to subscribe to them.
+    /// </summary>
+    /// <param name="_pickup">Pickup being subscribed to</param>
     public void AddPickupRequired(Pickup _pickup)
     {
-        if (pickupsNeeded.Contains(_pickup))
+        if (pickupsSubscribedTo.Contains(_pickup))
         {
             return;
         }
 
-        pickupsNeeded.Add(_pickup);
+        pickupsSubscribedTo.Add(_pickup);
         _pickup.OnPickUp += PickupCollected;
     }
 }

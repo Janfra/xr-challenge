@@ -8,7 +8,6 @@ public class CameraHandler : MonoBehaviour
     [SerializeField]
     private Transform playerPosition;
 
-
     #region Constants
 
     /// <summary>
@@ -18,7 +17,7 @@ public class CameraHandler : MonoBehaviour
     /// <summary>
     /// Height difference kept to cam target
     /// </summary>
-    private const float CAM_HEIGHT = 4.151f;
+    private const float CAM_HEIGHT = 8.5f;
 
     #endregion
 

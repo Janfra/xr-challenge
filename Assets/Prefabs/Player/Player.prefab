@@ -354,6 +354,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f15318c42b2bde46bb8466e454f9070, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerRigidbody: {fileID: 0}
   rotationHandler:
     hitOnlyLayers:
       serializedVersion: 2
@@ -369,11 +370,15 @@ MonoBehaviour:
       m_Bits: 64
     groundCheck: {fileID: 5090573910513390467}
     groundCheckSize: 0.05
-  speed: 5
-  wallCheckSize: 0
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 0
+    coyoteTime: 0.2
+    jumpBufferTime: 0.2
+  movementHandler:
+    transform: {fileID: 0}
+    speed: 2
+    wallCheckSize: 0.05
+    wallLayer:
+      serializedVersion: 2
+      m_Bits: 0
 --- !u!114 &1144993796279382424
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    #region Other Variables
-    
-    private float playerYSize;
+    private bool isScenePaused;
 
-    #endregion
+    [Header("Dependencies")]
+    [SerializeField]
+    private Rigidbody playerRigidbody;
 
     #region Components
 
@@ -20,9 +20,16 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
+    private void Awake()
+    {
+        if (playerRigidbody == null)
+        {
+            playerRigidbody = GetComponent<Rigidbody>();
+        }
+    }
+
     private void Start()
     {
-        playerYSize = GetComponent<MeshRenderer>().bounds.size.y;
         movementHandler.Init(transform);
         rotationHandler.Init();
         jumpHandler.Init();
@@ -30,15 +37,41 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        jumpHandler.GetInputs();
-        movementHandler.GetInputs();
-        rotationHandler.GetRotation(transform);
+        if(!isScenePaused)
+        {
+            jumpHandler.GetInputs();
+            movementHandler.GetInputs();
+            rotationHandler.GetRotation(transform);
+        }
+
+        PauseHandler();
     }
 
     void FixedUpdate()
     {
-        jumpHandler.HandleJump();
-        movementHandler.HandleMovement();
+        if (!isScenePaused)
+        {
+            jumpHandler.HandleJump();
+            movementHandler.HandleMovement();
+        }
+    }
+
+    private void PauseHandler()
+    {
+        if (Input.GetKeyDown(KeyCode.Q) && GameManager.Instance.CurrentState != GameManager.GameStates.Pause)
+        {
+            isScenePaused = true;
+            playerRigidbody.useGravity = false;
+            playerRigidbody.Sleep();
+            GameManager.Instance.UpdateState(GameManager.GameStates.Pause);
+        }
+        else if (Input.GetKeyDown(KeyCode.Q))
+        {
+            isScenePaused = false;
+            playerRigidbody.useGravity = true;
+            playerRigidbody.WakeUp();
+            GameManager.Instance.UpdateState(GameManager.GameStates.Main);
+        }
     }
 
     private void OnDrawGizmos()

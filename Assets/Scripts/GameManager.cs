@@ -12,6 +12,11 @@ public class GameManager : MonoBehaviour
     private GameStates currentState;
     public GameStates CurrentState => currentState;
 
+    [Header("Dependencies")]
+    [SerializeField]
+    private ScenesAvailable[] scenesAvailable;
+    private Dictionary<GameStates, string> scenesForState;
+
     private void Awake()
     {
         // Singleton
@@ -19,23 +24,41 @@ public class GameManager : MonoBehaviour
         {
             DontDestroyOnLoad(this);
             Instance = this;
+
+            currentState = GameStates.Start;
+
+            scenesForState = new Dictionary<GameStates, string>();
+            foreach (var scene in scenesAvailable)
+            {
+                if (!scenesForState.ContainsKey(scene.sceneState))
+                {
+                    scenesForState.Add(scene.sceneState, scene.sceneName);
+                }
+            }
         }
         else
         {
             Destroy(this);
         }
+
     }
     
     public void UpdateState(GameStates _gameState)
     {
+        GameStates pastState = currentState;
         currentState = _gameState;
 
         switch (currentState)
         {
             case GameStates.Start:
                 break;
+            case GameStates.Pause:
+                break;
             case GameStates.Main:
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+                if(pastState != GameStates.Main && pastState != GameStates.Pause)
+                {
+                    TryLoadScene(currentState);
+                }
                 break;
             case GameStates.End:
                 break;
@@ -44,6 +67,18 @@ public class GameManager : MonoBehaviour
         }
 
         OnGameStateChanged?.Invoke(currentState);
+    }
+
+    private void TryLoadScene(GameStates _gameState)
+    {
+        if (scenesForState.TryGetValue(_gameState, out string stateSceneName))
+        {
+            SceneManager.LoadScene(stateSceneName);
+        }
+        else
+        {
+            Debug.LogError("State scene not found!");
+        }
     }
 
     public void OnStartGame()
@@ -55,7 +90,15 @@ public class GameManager : MonoBehaviour
     public enum GameStates
     {
         Start,
+        Pause,
         Main,
         End,
+    }
+
+    [System.Serializable]
+    private struct ScenesAvailable
+    {
+        public GameStates sceneState;
+        public string sceneName;
     }
 }

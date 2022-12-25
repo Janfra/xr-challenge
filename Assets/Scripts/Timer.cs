@@ -12,6 +12,7 @@ public class Timer
     public float TargetTime { get { return targetTime; } }
     public float CurrentTime { get; private set; }
     public bool IsTimerDone { get; private set; }
+    public bool IsTimerPaused { get; private set; }
 
     #endregion
 
@@ -112,6 +113,7 @@ public class Timer
         if(IsTimerDone == true)
         {
             IsTimerDone = false;
+            IsTimerPaused = false;
             _caller.StartCoroutine(RunTimer());
         }
         else
@@ -129,6 +131,22 @@ public class Timer
     }
 
     /// <summary>
+    /// Sets whether to pause the timer or not if active.
+    /// </summary>
+    /// <param name="_isTimerPaused">Is timer paused or not</param>
+    public void PauseTimer(bool _isTimerPaused)
+    {
+        if (!IsTimerDone)
+        {
+            IsTimerPaused = _isTimerPaused;
+        }
+        else
+        {
+            Debug.LogWarning("No timer currently active");
+        }
+    }
+
+    /// <summary>
     /// Updates current time until target is reached
     /// </summary>
     /// <returns></returns>
@@ -136,7 +154,10 @@ public class Timer
     {
         while (CurrentTime < targetTime && !IsTimerDone)
         {
-            SetCurrentTime(CurrentTime + Time.deltaTime);
+            if (!IsTimerPaused)
+            {
+                SetCurrentTime(CurrentTime + Time.deltaTime);
+            }
             yield return null;
         }
         IsTimerDone = true;
@@ -148,16 +169,16 @@ public class Timer
     /// <summary>
     /// Normalizes 'alpha' with the total duration. Modified to work with fractions.
     /// </summary>
-    /// <param name="alpha">Value to normalize</param>
-    /// <param name="duration">Max value of the normalize formula</param>
+    /// <param name="_alpha">Value to normalize</param>
+    /// <param name="_duration">Max value of the normalize formula</param>
     /// <returns>A value in between 0 and 1, the duration being 1</returns>
-    private float NormalizeTime(float alpha, float duration)
+    private float NormalizeTime(float _alpha, float _duration)
     {
         // 1 is added to everything to avoid dividing under 0 and getting unexpected values
         int minValue = 1;
-        alpha += minValue;
-        duration += minValue;
-        return (alpha - minValue) / (duration - minValue);
+        _alpha += minValue;
+        _duration += minValue;
+        return (_alpha - minValue) / (_duration - minValue);
     }
 
     /// <summary>
