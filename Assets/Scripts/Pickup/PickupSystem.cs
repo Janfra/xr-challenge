@@ -4,6 +4,7 @@ using UnityEngine;
 public class PickupSystem : MonoBehaviour
 {
     static public event Action<float> OnPickUpUIUpdate;
+    private float score = 0f;
 
     /// <summary>
     /// If collided with pickup, try to collect it.
@@ -15,8 +16,8 @@ public class PickupSystem : MonoBehaviour
         {
             if (!pickupItem.IsCollected)
             {
-                float pickupScore = pickupItem.GetPickedUp();
-                OnPickUpUIUpdate?.Invoke(pickupScore);
+                score += pickupItem.GetPickedUp();
+                OnPickUpUIUpdate?.Invoke(score);
             }
         }
     }

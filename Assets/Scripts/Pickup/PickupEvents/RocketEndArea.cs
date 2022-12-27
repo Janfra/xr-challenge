@@ -46,7 +46,7 @@ public class RocketEndArea : MonoBehaviour
         }
         else if (!AreAllPickupsCollected())
         {
-            OnScreenMessagesHandler.SetScreenMessage($"You still need to collect {pickupsSubscribedTo.Count} stars!");
+            OnScreenMessagesHandler.SetScreenMessage($"You still need to collect {pickupsSubscribedTo.Count - pickupsCollectedCount} stars!");
         }
     }
 

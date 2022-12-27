@@ -156,7 +156,7 @@ public class DisappearingPlatform : MonoBehaviour
                 case PlatformTypes.QuickFall:
                     return Color.blue;
                 case PlatformTypes.NormalFall:
-                    return Color.white;
+                    return Color.yellow;
                 case PlatformTypes.LongFall:
                     return Color.green;
                 default:

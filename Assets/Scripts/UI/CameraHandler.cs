@@ -87,10 +87,19 @@ public class CameraHandler : MonoBehaviour
     private Vector3 GetCameraPositionOnTarget(Transform _target)
     {
         Vector3 cameraOffsetPosition = _target.position;
-        cameraOffsetPosition.y += CAM_HEIGHT;
+        cameraOffsetPosition.y = YClamp(cameraOffsetPosition.y + CAM_HEIGHT);
         cameraOffsetPosition.z -= CAM_DISTANCE;
 
         return cameraOffsetPosition;
+    }
+
+    private float YClamp(float _yPos)
+    {
+        if(_yPos <= BOTTOM_FLOOR_Y_POS)
+        {
+            return BOTTOM_FLOOR_Y_POS;
+        }
+        return _yPos;
     }
 
     /// <summary>
