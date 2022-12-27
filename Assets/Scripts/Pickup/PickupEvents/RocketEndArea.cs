@@ -58,11 +58,19 @@ public class RocketEndArea : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks if all pickups required have been collected.
+    /// </summary>
+    /// <returns>Have all pickups required been collected</returns>
     private bool AreAllPickupsCollected()
     {
         return pickupsCollectedCount == pickupsSubscribedTo.Count;
     }
 
+    /// <summary>
+    /// Adds a pickup collected if it was not already included.
+    /// </summary>
+    /// <param name="_pickup"></param>
     private void PickupCollected(Pickup _pickup)
     {
         if (pickupsActivated.Contains(_pickup))

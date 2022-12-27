@@ -93,6 +93,11 @@ public class CameraHandler : MonoBehaviour
         return cameraOffsetPosition;
     }
 
+    /// <summary>
+    /// Clamps the camera Y position to match the bottom floor Y pos constants.
+    /// </summary>
+    /// <param name="_yPos">position being clamped</param>
+    /// <returns>The clamped result</returns>
     private float YClamp(float _yPos)
     {
         if(_yPos <= BOTTOM_FLOOR_Y_POS)

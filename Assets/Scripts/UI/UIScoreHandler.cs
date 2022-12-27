@@ -24,7 +24,7 @@ public class UIScoreHandler : MonoBehaviour
     /// <summary>
     /// Updates the score UI
     /// </summary>
-    /// <param name="_newScore"></param>
+    /// <param name="_newScore">New score being displayed</param>
     private void UpdateScore(float _newScore)
     {
         uiText.text = $"SCORE: {_newScore}";   
