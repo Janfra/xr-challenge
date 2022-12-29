@@ -20051,6 +20051,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   layerIndex: 5
+  pushPower: 1
 --- !u!135 &1004285626
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -33237,17 +33238,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: a328340e22e89eb4286ae93df4dd6a02,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 75.76
+      value: 73.98
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a328340e22e89eb4286ae93df4dd6a02,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a328340e22e89eb4286ae93df4dd6a02,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -7.89
+      value: -6.39
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a328340e22e89eb4286ae93df4dd6a02,
         type: 3}
@@ -41643,7 +41644,7 @@ PrefabInstance:
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
       propertyPath: jumpHandler.jumpBufferTime
-      value: 0.1
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}

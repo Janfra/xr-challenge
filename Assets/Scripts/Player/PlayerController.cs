@@ -14,7 +14,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private PlayerRotation rotationHandler;
     [SerializeField]
-    public PlayerJump JumpHandler { get; private set; }
+    private PlayerJump jumpHandler;
+    public PlayerJump JumpHandler => jumpHandler;
+
     [SerializeField]
     private PlayerMovement movementHandler;
 
@@ -32,7 +34,7 @@ public class PlayerController : MonoBehaviour
     {
         movementHandler.Init(transform);
         rotationHandler.Init();
-        JumpHandler.Init();
+        jumpHandler.Init();
 
         Dialogues.OnDialogue += SetEnabled; 
     }
@@ -41,7 +43,7 @@ public class PlayerController : MonoBehaviour
     {
         if(!isEnabled)
         {
-            JumpHandler.GetInputs();
+            jumpHandler.GetInputs();
             movementHandler.GetInputs();
             rotationHandler.GetRotation(transform);
         }
@@ -53,7 +55,7 @@ public class PlayerController : MonoBehaviour
     {
         if (!isEnabled)
         {
-            JumpHandler.HandleJump();
+            jumpHandler.HandleJump();
             movementHandler.HandleMovement();
         }
     }
@@ -83,17 +85,17 @@ public class PlayerController : MonoBehaviour
 
     public void SetToGrounded()
     {
-        JumpHandler.SetToGrounded();
+        jumpHandler.SetToGrounded();
     }
 
     public bool IsJumping()
     {
-        return JumpHandler.TimeSinceJump == 0;
+        return jumpHandler.TimeSinceJump == 0;
     }
 
     private void OnDrawGizmos()
     {
-        JumpHandler.OnGizmos();
+        jumpHandler.OnGizmos();
 
         movementHandler.OnGizmos();
     }
