@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,8 @@ using UnityEngine;
 [System.Serializable]
 public class PlayerJump
 {
+    public event Action OnJump;
+
     #region Other Variables & Contants
 
     private bool isPlayerOnGround;
@@ -19,10 +22,10 @@ public class PlayerJump
     #region Jump Buffer
 
     private float timeDelayToJump;
-    private float timeSinceJump;
-    private bool isInJumpTime => timeSinceJump > 0f && timeDelayToJump < 0;
+    public float TimeSinceJump { get; private set; }
+    private bool isInJumpTime => TimeSinceJump > 0f && timeDelayToJump < 0;
 
-    private const float JUMP_DELAY = 0.25f;
+    private const float JUMP_DELAY = 0.3f;
 
     #endregion
 
@@ -142,11 +145,11 @@ public class PlayerJump
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            timeSinceJump = jumpBufferTime;
+            TimeSinceJump = jumpBufferTime;
         }
         else
         {
-            timeSinceJump -= Time.deltaTime;
+            TimeSinceJump -= Time.deltaTime;
             timeDelayToJump -= Time.deltaTime;
         }
     }
@@ -156,9 +159,10 @@ public class PlayerJump
     /// </summary>
     private void Jump()
     {
-        timeSinceJump = 0;
+        TimeSinceJump = 0;
         timeDelayToJump = JUMP_DELAY;
         rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        OnJump?.Invoke();
     }
 
     /// <summary>
@@ -170,6 +174,11 @@ public class PlayerJump
         {
             rigidbody.AddForce((1 - jumpCutMultiplier) * rigidbody.velocity.y * Vector3.down, ForceMode.Impulse);
         }
+    }
+
+    public void SetToGrounded()
+    {
+        timeSinceGrounded = coyoteTime;
     }
 
     /// <summary>
