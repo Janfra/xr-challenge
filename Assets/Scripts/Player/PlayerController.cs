@@ -88,11 +88,6 @@ public class PlayerController : MonoBehaviour
         jumpHandler.SetToGrounded();
     }
 
-    public bool IsJumping()
-    {
-        return jumpHandler.TimeSinceJump == 0;
-    }
-
     private void OnDrawGizmos()
     {
         jumpHandler.OnGizmos();

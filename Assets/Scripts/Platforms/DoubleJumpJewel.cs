@@ -1,52 +1,66 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DoubleJumpJewel : MonoBehaviour
 {
+    private PlayerController player;
+    private bool isActive;
+    private int activeLayerIndex;
+
     [Header("Config")]
     [SerializeField]
-    private int layerIndex = 5;
+    private int disableLayerIndex = 5;
     [SerializeField]
     private float pushPower;
 
-    private PlayerController player;
-
     private void OnValidate()
     {
-        LayerCheck.CheckLayerIndex(ref layerIndex);
+        LayerCheck.CheckLayerIndex(ref disableLayerIndex);
+    }
+
+    private void Awake()
+    {
+        activeLayerIndex = gameObject.layer;
     }
 
     private void OnTriggerEnter(Collider other)
     {
         transform.localScale *= 2;
-        if(other.TryGetComponent(out player))
+        if (player == null)
         {
-            player.JumpHandler.OnJump += Activate;
+            if(other.TryGetComponent(out player))
+            {
+                player.JumpHandler.OnJump += Disable;
+                player.JumpHandler.OnGrounded += Disable;
+                StartCoroutine(StartJewelEffect());
+            }
         }
-    }
-
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (player != null)
-        {
-            player.SetToGrounded();
-        }
+        gameObject.layer = disableLayerIndex;
     }
 
     private void OnTriggerExit(Collider other)
     {
         transform.localScale /= 2;
-        if(player != null)
-        {
-            player.JumpHandler.OnJump -= Activate;
-        }
+    }
+
+    private void Disable()
+    {
+        isActive = false;
+        gameObject.layer = activeLayerIndex;
+        player.JumpHandler.OnJump -= Disable;
+        player.JumpHandler.OnGrounded -= Disable;
+        StopAllCoroutines();
         player = null;
     }
-    private void Activate()
+
+    private IEnumerator StartJewelEffect()
     {
-        throw new NotImplementedException();
+        isActive = true;
+        while (isActive)
+        {
+            Debug.Log("Running jewel effect");
+            player.SetToGrounded();
+            yield return null;
+        }
     }
 }

@@ -7,6 +7,7 @@ using UnityEngine;
 public class PlayerJump
 {
     public event Action OnJump;
+    public event Action OnGrounded;
 
     #region Other Variables & Contants
 
@@ -98,6 +99,9 @@ public class PlayerJump
         }
     }
 
+    /// <summary>
+    /// Gets all inputs required for the component to work
+    /// </summary>
     public void GetInputs()
     {
         UpdateJumpBuffer();
@@ -131,6 +135,7 @@ public class PlayerJump
         if (isPlayerOnGround)
         {
             timeSinceGrounded = coyoteTime;
+            OnGrounded?.Invoke();
         }
         else
         {
@@ -159,10 +164,19 @@ public class PlayerJump
     /// </summary>
     private void Jump()
     {
-        TimeSinceJump = 0;
-        timeDelayToJump = JUMP_DELAY;
+        JumpSetup();
         rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         OnJump?.Invoke();
+    }
+
+    /// <summary>
+    /// Restart jump time and delay as well as cancelling Y velocity for consistent jumping.
+    /// </summary>
+    private void JumpSetup()
+    {
+        TimeSinceJump = 0;
+        timeDelayToJump = JUMP_DELAY;
+        rigidbody.velocity = new Vector3(rigidbody.velocity.x, 0, rigidbody.velocity.z);
     }
 
     /// <summary>
