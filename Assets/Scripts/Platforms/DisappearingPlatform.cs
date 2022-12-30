@@ -32,8 +32,6 @@ public class DisappearingPlatform : MonoBehaviour
 
     #endregion
 
-    private Material material;
-
     private void Awake()
     {
         timer = new Timer();

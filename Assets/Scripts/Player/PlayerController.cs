@@ -83,9 +83,9 @@ public class PlayerController : MonoBehaviour
         isEnabled = _isEnabled;
     }
 
-    public void SetToGrounded()
+    public void EnableJumping()
     {
-        jumpHandler.SetToGrounded();
+        jumpHandler.ResetCoyoteTime();
     }
 
     private void OnDrawGizmos()

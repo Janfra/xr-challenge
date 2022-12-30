@@ -6,11 +6,15 @@ public class Dialogues : MonoBehaviour
 {
     public static event Action<bool> OnDialogue;
 
+    #region Config
+
     [Header("Config")]
     [SerializeField]
     private string[] dialogueText;
     [SerializeField]
     private GameObject dialogueAlert;
+
+    #endregion
 
     #region Variables & Constants
 

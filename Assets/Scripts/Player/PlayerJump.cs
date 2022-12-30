@@ -1,7 +1,6 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [System.Serializable]
 public class PlayerJump
@@ -30,6 +29,12 @@ public class PlayerJump
 
     #endregion
 
+    #region Land Mark
+
+    private const float LAND_MARK_DISTANCE_SHOW = 2.3f;
+
+    #endregion
+
     #endregion
 
     #region Dependencies
@@ -37,6 +42,10 @@ public class PlayerJump
     [Header("Dependencies")]
     [SerializeField]
     private Rigidbody rigidbody;
+    [SerializeField]
+    private Canvas landMarkCanvas;
+    [SerializeField]
+    private Image landMarkImage;
 
     #endregion
 
@@ -131,14 +140,23 @@ public class PlayerJump
     private void IsPlayerOnGroundUpdate()
     {
         isPlayerOnGround = Physics.CheckSphere(groundCheck.position, groundCheckSize, jumpableLayer);
-
         if (isPlayerOnGround)
         {
+            landMarkCanvas.gameObject.SetActive(false);
             timeSinceGrounded = coyoteTime;
             OnGrounded?.Invoke();
         }
         else
         {
+            // Land mark positioning and showing 
+            if(Physics.Raycast(rigidbody.position, Vector3.down, out RaycastHit hit, LAND_MARK_DISTANCE_SHOW, jumpableLayer))
+            {
+                SetLandMark(hit.point);
+            }
+            else
+            {
+                landMarkCanvas.gameObject.SetActive(false);
+            }
             timeSinceGrounded -= Time.deltaTime;
         }
     }
@@ -190,9 +208,43 @@ public class PlayerJump
         }
     }
 
-    public void SetToGrounded()
+    /// <summary>
+    /// Resets the 'timeSinceGrounded' time to the coyote time, enabling jumping.
+    /// </summary>
+    public void ResetCoyoteTime()
     {
         timeSinceGrounded = coyoteTime;
+    }
+
+    /// <summary>
+    /// Sets the landing mark position and colour based on distance.
+    /// </summary>
+    /// <param name="_position"></param>
+    private void SetLandMark(Vector3 _position)
+    {
+        landMarkCanvas.gameObject.SetActive(true);
+
+        // Set colour based on how far from landing point
+        Color imageColour = landMarkImage.color;
+        imageColour.a = GetOpacity(LAND_MARK_DISTANCE_SHOW - Vector3.Distance(rigidbody.position, _position));
+        landMarkImage.color = imageColour;
+
+        // Offset the position to avoid clipping.
+        Vector3 newPos = _position;
+        newPos.y += 0.1f;
+        landMarkCanvas.transform.position = newPos;
+    }
+
+    /// <summary>
+    /// Get opacity based on distance given and landing distance show.
+    /// </summary>
+    /// <param name="_distance">Distance being compared</param>
+    /// <returns>Value in between 0 and 1</returns>
+    private float GetOpacity(float _distance)
+    {
+        float minDistance = 1f;
+        _distance += minDistance;
+        return (_distance - minDistance) / ((LAND_MARK_DISTANCE_SHOW + minDistance) - minDistance);
     }
 
     /// <summary>
