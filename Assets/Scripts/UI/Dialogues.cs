@@ -18,8 +18,10 @@ public class Dialogues : MonoBehaviour
 
     #region Variables & Constants
 
+    private bool nextInput => Input.GetKeyDown(KeyCode.E);
     private int currentDialogue = 0;
     private bool isLoading = false;
+    private bool cancelLoading = false;
     private const float TEXT_DELAY = 0.05f;
     private const float ALERT_Y_MOVEMENT = 0.3f;
 
@@ -53,14 +55,17 @@ public class Dialogues : MonoBehaviour
         StartCoroutine(SetScreenMessage(dialogueText[currentDialogue]));
         while(currentDialogue != dialogueText.Length || isLoading)
         {
-            bool nextInput = Input.GetKeyDown(KeyCode.E);
             if (nextInput && !isLoading)
             {
                 currentDialogue += 1;
-                if(currentDialogue != dialogueText.Length)
+                if (currentDialogue != dialogueText.Length)
                 {
                     StartCoroutine(SetScreenMessage(dialogueText[Mathf.Clamp(currentDialogue, 0, dialogueText.Length - 1)]));
                 }
+            }
+            else if(nextInput && isLoading)
+            {
+                cancelLoading = true;
             }
             yield return null;
         }
@@ -80,12 +85,22 @@ public class Dialogues : MonoBehaviour
         if (!isLoading)
         {
             isLoading = true;
+            cancelLoading = false;
             string tempString = "";
             for (int i = 0; i < _dialogueText.Length; i++)
             {
-                tempString += _dialogueText[i];
-                yield return new WaitForSeconds(TEXT_DELAY);
-                OnScreenMessagesHandler.SetScreenMessage(tempString);
+                if (!cancelLoading)
+                {
+                    tempString += _dialogueText[i];
+                    yield return new WaitForSeconds(TEXT_DELAY);
+                    OnScreenMessagesHandler.SetScreenMessage(tempString);
+                }
+                else
+                {
+                    i = _dialogueText.Length;
+                    OnScreenMessagesHandler.SetScreenMessage(_dialogueText);
+                    yield return new WaitForSeconds(TEXT_DELAY);
+                }
             }
             isLoading = false;
         }

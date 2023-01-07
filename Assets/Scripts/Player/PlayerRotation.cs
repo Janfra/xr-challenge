@@ -104,7 +104,7 @@ public class PlayerRotation
 
         // Rotates toward target
         Quaternion rotationTarget = Quaternion.LookRotation(rotation);
-        _transform.rotation = Quaternion.RotateTowards(_transform.rotation, rotationTarget, rotationSpeed);
+        _transform.rotation = Quaternion.RotateTowards(_transform.rotation, rotationTarget, rotationSpeed * Time.deltaTime);
     }
 
     /// <summary>
