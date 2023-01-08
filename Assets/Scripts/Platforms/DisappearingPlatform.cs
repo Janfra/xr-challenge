@@ -71,9 +71,25 @@ public class DisappearingPlatform : MonoBehaviour
 
     private abstract class DisappearingStates
     {
+        /// <summary>
+        /// Sets off the logic for the current states
+        /// </summary>
+        /// <param name="_caller">Caller to run logic on</param>
         public abstract void StartStateLogic(DisappearingPlatform _caller);
+        /// <summary>
+        /// Runs the logic of the current state
+        /// </summary>
+        /// <param name="_caller"></param>
         protected abstract IEnumerator RunStateLogic(DisappearingPlatform _caller);
+        /// <summary>
+        /// Initializes the current state
+        /// </summary>
+        /// <param name="_caller"></param>
         protected abstract void Init(DisappearingPlatform _caller);
+        /// <summary>
+        /// Runs on completing state to reset it and run any final logic
+        /// </summary>
+        /// <param name="_caller"></param>
         protected abstract void OnComplete(DisappearingPlatform _caller);
     }
     
@@ -81,7 +97,8 @@ public class DisappearingPlatform : MonoBehaviour
     private class UntouchedState : DisappearingStates
     {
         [SerializeField]
-        private float durationTillFall = 1f;
+        private PlatformTypes platformType = PlatformTypes.QuickFall;
+        private float durationTillFall = 0f;
         private bool isFalling;
 
         public override void StartStateLogic(DisappearingPlatform _caller)
@@ -128,18 +145,8 @@ public class DisappearingPlatform : MonoBehaviour
         /// </summary>
         public void SetPlatformType(DisappearingPlatform _caller)
         {
-            if(durationTillFall <= ((int)PlatformTypes.QuickFall))
-            {
-                _caller.meshRenderer.material.color = GetPlatformTypeColour(PlatformTypes.QuickFall);
-            }
-            else if(durationTillFall <= ((int)PlatformTypes.NormalFall))
-            {
-                _caller.meshRenderer.material.color = GetPlatformTypeColour(PlatformTypes.NormalFall);
-            }
-            else
-            {
-                _caller.meshRenderer.material.color = GetPlatformTypeColour(PlatformTypes.LongFall);
-            }
+            durationTillFall = (int)platformType;
+            _caller.meshRenderer.material.color = GetPlatformTypeColour(platformType);
         }
 
         /// <summary>
@@ -151,6 +158,8 @@ public class DisappearingPlatform : MonoBehaviour
         {
             switch (platformType)
             {
+                case PlatformTypes.InstantFall:
+                    return Color.gray;
                 case PlatformTypes.QuickFall:
                     return Color.blue;
                 case PlatformTypes.NormalFall:
@@ -158,7 +167,7 @@ public class DisappearingPlatform : MonoBehaviour
                 case PlatformTypes.LongFall:
                     return Color.green;
                 default:
-                    Debug.Log("Platform type requested doesnt exist... somehow.");
+                    Debug.LogError("Platform type requested doesnt exist, or has not been set in GetPlatformTypeColour function.");
                     return Color.red;
             }
         }
@@ -166,6 +175,7 @@ public class DisappearingPlatform : MonoBehaviour
         [System.Serializable]
         public enum PlatformTypes 
         {
+            InstantFall = 0,
             QuickFall = 2,
             NormalFall = 4,
             LongFall = 6,

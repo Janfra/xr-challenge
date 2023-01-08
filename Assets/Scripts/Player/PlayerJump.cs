@@ -31,7 +31,8 @@ public class PlayerJump
 
     #region Land Mark
 
-    private const float LAND_MARK_DISTANCE_SHOW = 2.3f;
+    private const float LAND_MARK_DISTANCE_SHOW = 3f;
+    private const float LAND_MARK_MAX_OPACITY = 0.4f;
 
     #endregion
 
@@ -244,7 +245,8 @@ public class PlayerJump
     {
         float minDistance = 1f;
         _distance += minDistance;
-        return (_distance - minDistance) / ((LAND_MARK_DISTANCE_SHOW + minDistance) - minDistance);
+        float opacity = Mathf.Clamp((_distance - minDistance) / ((LAND_MARK_DISTANCE_SHOW + minDistance) - minDistance), 0, LAND_MARK_MAX_OPACITY);
+        return opacity;
     }
 
     /// <summary>

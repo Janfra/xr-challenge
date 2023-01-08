@@ -75,7 +75,7 @@ public class Timer
     /// <param name="_TargetTime"></param>
     private void SetTargetTime(float _TargetTime)
     {
-        if(_TargetTime > 0)
+        if(_TargetTime >= 0)
         {
             targetTime = _TargetTime;
         }
