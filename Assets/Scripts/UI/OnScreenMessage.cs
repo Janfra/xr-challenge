@@ -22,7 +22,7 @@ public class OnScreenMessage : MonoBehaviour
     private bool isCancelled = false;
     private bool isLoading = false;
     public bool IsLoading => isLoading;
-    private const float TEXT_DELAY = 0.05f;
+    private const float TEXT_LOADING_DELAY = 0.05f;
 
     #endregion
 
@@ -31,6 +31,10 @@ public class OnScreenMessage : MonoBehaviour
         OnScreenMessagesHandler.SetDependencies(this);
     }
 
+    /// <summary>
+    /// Starts loading the text given if a text is not already loading.
+    /// </summary>
+    /// <param name="_text">Text to load</param>
     public void SetText(string _text)
     {
         if (!isLoading)
@@ -39,6 +43,10 @@ public class OnScreenMessage : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Loads the given text letter by letter based on the TEXT_LOADING_DELAY.
+    /// </summary>
+    /// <param name="_text"></param>
     private IEnumerator LoadText(string _text)
     {
         isLoading = true;
@@ -49,27 +57,35 @@ public class OnScreenMessage : MonoBehaviour
             if (!isCancelled)
             {
                 tempString += _text[i];
-                yield return new WaitForSeconds(TEXT_DELAY);
+                yield return new WaitForSeconds(TEXT_LOADING_DELAY);
                 onScreenText.text = tempString;
             }
             else
             {
+                // If cancelled instantly load text
                 onScreenText.text = _text;
-                yield return new WaitForSeconds(TEXT_DELAY);
+                yield return new WaitForSeconds(TEXT_LOADING_DELAY);
                 break;
             }
         }
         isLoading = false;
     }
 
+    /// <summary>
+    /// Cancels text loading and instantly displays text.
+    /// </summary>
     public void CancelLoading()
     {
         isCancelled = true;
     }
 
-    public void SetCanvasVisible(bool _isActive)
+    /// <summary>
+    /// Sets the canvas visibility
+    /// </summary>
+    /// <param name="_isVisible">Is the canvas visible</param>
+    public void SetCanvasVisible(bool _isVisible)
     {
-        canvas.gameObject.SetActive(_isActive);
+        canvas.gameObject.SetActive(_isVisible);
     }
 }
 
