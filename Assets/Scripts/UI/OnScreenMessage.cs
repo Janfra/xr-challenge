@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class OnScreenMessage : MonoBehaviour
 {
+    #region Dependencies
+
     [Header("Dependencies")]
     [SerializeField]
     private Canvas canvas;
@@ -13,9 +15,61 @@ public class OnScreenMessage : MonoBehaviour
     private TextMeshProUGUI onScreenText;
     public TextMeshProUGUI OnScreenText => onScreenText;
 
+    #endregion
+
+    #region Variables & Constants
+
+    private bool isCancelled = false;
+    private bool isLoading = false;
+    public bool IsLoading => isLoading;
+    private const float TEXT_DELAY = 0.05f;
+
+    #endregion
+
     private void Awake()
     {
         OnScreenMessagesHandler.SetDependencies(this);
+    }
+
+    public void SetText(string _text)
+    {
+        if (!isLoading)
+        {
+            StartCoroutine(LoadText(_text));
+        }
+    }
+
+    private IEnumerator LoadText(string _text)
+    {
+        isLoading = true;
+        isCancelled = false;
+        string tempString = "";
+        for (int i = 0; i < _text.Length; i++)
+        {
+            if (!isCancelled)
+            {
+                tempString += _text[i];
+                yield return new WaitForSeconds(TEXT_DELAY);
+                onScreenText.text = tempString;
+            }
+            else
+            {
+                onScreenText.text = _text;
+                yield return new WaitForSeconds(TEXT_DELAY);
+                break;
+            }
+        }
+        isLoading = false;
+    }
+
+    public void CancelLoading()
+    {
+        isCancelled = true;
+    }
+
+    public void SetCanvasVisible(bool _isActive)
+    {
+        canvas.gameObject.SetActive(_isActive);
     }
 }
 
@@ -23,8 +77,7 @@ public static class OnScreenMessagesHandler
 {
     #region Dependencies
 
-    private static Canvas canvas;
-    private static TextMeshProUGUI onScreenText;
+    private static OnScreenMessage onScreenMessage;
 
     #endregion
 
@@ -37,7 +90,7 @@ public static class OnScreenMessagesHandler
     #region Variables & Constants
 
     private const float SCREENMESSAGE_DURATION = 2f;
-    public static string OnScreenMessage => onScreenText.text;
+    public static string OnScreenMessage => onScreenMessage.OnScreenText.text;
     public static float TimerDuration => timer.CurrentTime;
 
     #endregion
@@ -48,8 +101,7 @@ public static class OnScreenMessagesHandler
     /// <param name="_onScreenMessage">Class containing the dependencies</param>
     public static void SetDependencies(OnScreenMessage _onScreenMessage)
     {
-        canvas = _onScreenMessage.Canvas;
-        onScreenText = _onScreenMessage.OnScreenText;
+        onScreenMessage = _onScreenMessage;
         timer = new Timer();
     }
 
@@ -58,18 +110,17 @@ public static class OnScreenMessagesHandler
     /// </summary>
     /// <typeparam name="T">Requires Monobehaviour</typeparam>
     /// <param name="_newText">Text to display</param>
-    /// <param name="_caller">Object requesting to set the message</param>
-    public static void SetScreenMessage<T>(string _newText, T _caller) where T : MonoBehaviour
+    public static void SetScreenMessage<T>(string _newText)
     {
-        if (AreDependenciesMissing())
+        if(AreDependenciesMissing())
         {
             return;
         }
 
         if(_newText.Length > 0)
         {
-            _caller.StartCoroutine(StartOnScreenTimeOut(_caller));
-            onScreenText.text = _newText;
+            onScreenMessage.StartCoroutine(StartOnScreenTimeOut(onScreenMessage));
+            onScreenMessage.SetText(_newText);
         }
     }
 
@@ -79,15 +130,15 @@ public static class OnScreenMessagesHandler
     /// <param name="_newText">Text to display</param>
     public static void SetScreenMessage(string _newText)
     {
-        if (AreDependenciesMissing())
+        if(AreDependenciesMissing())
         {
             return;
         }
 
-        if (_newText.Length > 0)
+        if(_newText.Length > 0)
         {
-            canvas.gameObject.SetActive(true);
-            onScreenText.text = _newText;
+            onScreenMessage.SetCanvasVisible(true);
+            onScreenMessage.SetText(_newText);
         }
     }
 
@@ -96,7 +147,24 @@ public static class OnScreenMessagesHandler
     /// </summary>
     public static void DisableScreenMessage()
     {
-        canvas.gameObject.SetActive(false);
+        onScreenMessage.SetCanvasVisible(false);
+    }
+
+    /// <summary>
+    /// Returns if the text on screen is loading
+    /// </summary>
+    /// <returns>Is the text loading</returns>
+    public static bool IsTextLoading()
+    {
+        return onScreenMessage.IsLoading;
+    }
+
+    /// <summary>
+    /// Stops the loading and instantly displays the text
+    /// </summary>
+    public static void CancelLoading()
+    {
+        onScreenMessage.CancelLoading();
     }
 
     /// <summary>
@@ -108,26 +176,21 @@ public static class OnScreenMessagesHandler
     private static IEnumerator StartOnScreenTimeOut<T>(T _caller) where T : MonoBehaviour
     {
         Debug.Log("Time out started");
-        if (timer.IsTimerDone)
+        if(timer.IsTimerDone)
         {
-            canvas.gameObject.SetActive(true);
+            onScreenMessage.SetCanvasVisible(true);
             timer.SetTimer(SCREENMESSAGE_DURATION);
             timer.StartTimer(_caller);
-            while (!timer.IsTimerDone)
+            while(!timer.IsTimerDone)
             {
                 yield return null;
             }
-            if (!AreDependenciesMissing())
+            if(!AreDependenciesMissing())
             {
-                canvas.gameObject.SetActive(false);
+                onScreenMessage.SetCanvasVisible(false);
             }
         }
         yield return null;
-    }
-
-    private static void ExtendTimer()
-    {
-        timer.SetTimer(SCREENMESSAGE_DURATION + timer.CurrentTime, false);
     }
 
     /// <summary>
@@ -136,9 +199,9 @@ public static class OnScreenMessagesHandler
     /// <returns>Is a dependency missing</returns>
     private static bool AreDependenciesMissing()
     {
-        if (onScreenText == null || canvas == null)
+        if(onScreenMessage == null)
         {
-            Debug.LogError("On screen text has not been set in the OnScreenMessagesHandler!");
+            Debug.LogError("On screen message has not been set in the OnScreenMessagesHandler!");
             return true;
         }
         return false;
