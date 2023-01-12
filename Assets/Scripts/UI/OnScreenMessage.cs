@@ -52,6 +52,10 @@ public class OnScreenMessage : MonoBehaviour
         isLoading = true;
         isCancelled = false;
         string tempString = "";
+
+        // Clear text
+        onScreenText.text = "";
+
         for (int i = 0; i < _text.Length; i++)
         {
             if (!isCancelled)
@@ -124,19 +128,24 @@ public static class OnScreenMessagesHandler
     /// <summary>
     /// Sets the screen message text and starts displaying it with a timeout.
     /// </summary>
-    /// <typeparam name="T">Requires Monobehaviour</typeparam>
     /// <param name="_newText">Text to display</param>
-    public static void SetScreenMessage<T>(string _newText)
+    /// <param name="isTimeOut">Is timeout started</param>
+    public static void SetScreenMessage(string _newText, bool isTimeOut)
     {
         if(AreDependenciesMissing())
         {
             return;
         }
 
-        if(_newText.Length > 0)
+        if(_newText.Length > 0 && isTimeOut)
         {
             onScreenMessage.StartCoroutine(StartOnScreenTimeOut(onScreenMessage));
             onScreenMessage.SetText(_newText);
+        }
+        else
+        {
+            Debug.Log("For setting message with no timeout just use overload with no boolean parameter!");
+            SetScreenMessage(_newText);
         }
     }
 

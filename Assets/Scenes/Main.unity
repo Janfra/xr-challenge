@@ -28245,9 +28245,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 430853590}
     m_Modifications:
+    - target: {fileID: 1517705448438374, guid: 9c436d2eaf5a77e48a26bcbc3a68e3cb, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 1942245548449254, guid: 9c436d2eaf5a77e48a26bcbc3a68e3cb, type: 3}
       propertyPath: m_Name
       value: Pickup (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942245548449254, guid: 9c436d2eaf5a77e48a26bcbc3a68e3cb, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4763621664299174, guid: 9c436d2eaf5a77e48a26bcbc3a68e3cb, type: 3}
       propertyPath: m_RootOrder
@@ -28292,6 +28300,16 @@ PrefabInstance:
     - target: {fileID: 4763621664299174, guid: 9c436d2eaf5a77e48a26bcbc3a68e3cb, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5703120401451068077, guid: 9c436d2eaf5a77e48a26bcbc3a68e3cb,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909601540377650089, guid: 9c436d2eaf5a77e48a26bcbc3a68e3cb,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9c436d2eaf5a77e48a26bcbc3a68e3cb, type: 3}
@@ -31739,6 +31757,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: RocketEndArea (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5409450960984420019, guid: e03907dd30ce1ef488ac4a5779228f6b,
+        type: 3}
+      propertyPath: m_Layer
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5409450960984420023, guid: e03907dd30ce1ef488ac4a5779228f6b,
         type: 3}
@@ -42762,7 +42785,7 @@ PrefabInstance:
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
       propertyPath: movementHandler.wallLayer.m_Bits
-      value: 2147483716
+      value: 2147483712
       objectReference: {fileID: 0}
     - target: {fileID: 2059216592121986447, guid: 99369145c16aef04bbfd4728056e4cfb,
         type: 3}
