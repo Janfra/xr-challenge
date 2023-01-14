@@ -7,11 +7,11 @@ public class PauseUI : MonoBehaviour
 {
     [Header("Dependencies")]
     [SerializeField]
-    private GameObject pauseUI;
+    private GameObject pauseUIContainer;
 
     private void Awake()
     {
-        if(pauseUI == null)
+        if(pauseUIContainer == null)
         {
             Debug.LogError("No pause UI set");
         }
@@ -24,6 +24,6 @@ public class PauseUI : MonoBehaviour
 
     private void OnPause(GameManager.GameStates _gameState)
     {
-        pauseUI.SetActive(_gameState == GameManager.GameStates.Pause);
+        pauseUIContainer.SetActive(_gameState == GameManager.GameStates.Pause);
     }
 }

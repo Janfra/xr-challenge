@@ -8,20 +8,27 @@ public class OnScreenMessage : MonoBehaviour
 
     [Header("Dependencies")]
     [SerializeField]
-    private Canvas canvas;
-    public Canvas Canvas => canvas;
+    private GameObject container;
+    public GameObject Container => container;
 
     [SerializeField]
     private TextMeshProUGUI onScreenText;
     public TextMeshProUGUI OnScreenText => onScreenText;
 
+    [SerializeField]
+    private Animator onScreenAnimations;
+
     #endregion
 
     #region Variables & Constants
 
+    private string displayText;
     private bool isCancelled = false;
     private bool isLoading = false;
     public bool IsLoading => isLoading;
+
+    private bool isVisible;
+    private bool isDelayed = true;
     private const float TEXT_LOADING_DELAY = 0.05f;
 
     #endregion
@@ -39,35 +46,40 @@ public class OnScreenMessage : MonoBehaviour
     {
         if (!isLoading)
         {
-            StartCoroutine(LoadText(_text));
+            displayText = _text;
+            StartCoroutine(LoadText());
         }
     }
 
     /// <summary>
-    /// Loads the given text letter by letter based on the TEXT_LOADING_DELAY.
+    /// Loads the stored text letter by letter based on the TEXT_LOADING_DELAY.
     /// </summary>
-    /// <param name="_text"></param>
-    private IEnumerator LoadText(string _text)
+    private IEnumerator LoadText()
     {
         isLoading = true;
         isCancelled = false;
         string tempString = "";
-
-        // Clear text
         onScreenText.text = "";
 
-        for (int i = 0; i < _text.Length; i++)
+        for (int i = 0; i < displayText.Length && isLoading; i++)
         {
+            if (isDelayed)
+            {
+                i--;
+                yield return null;
+                continue;
+            }
+
             if (!isCancelled)
             {
-                tempString += _text[i];
+                tempString += displayText[i];
                 yield return new WaitForSeconds(TEXT_LOADING_DELAY);
                 onScreenText.text = tempString;
             }
             else
             {
                 // If cancelled instantly load text
-                onScreenText.text = _text;
+                onScreenText.text = displayText;
                 yield return new WaitForSeconds(TEXT_LOADING_DELAY);
                 break;
             }
@@ -84,12 +96,36 @@ public class OnScreenMessage : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets the canvas visibility
+    /// Sets the canvas visibility, which starts the animations
     /// </summary>
     /// <param name="_isVisible">Is the canvas visible</param>
-    public void SetCanvasVisible(bool _isVisible)
+    public void SetContainerVisible(bool _isVisible)
     {
-        canvas.gameObject.SetActive(_isVisible);
+        onScreenAnimations.enabled = true;
+        onScreenAnimations.SetBool("IsShowing", _isVisible);
+        isVisible = _isVisible;
+    }
+
+    /// <summary>
+    /// Sets when to start or stop the delay set to align text with animation.
+    /// </summary>
+    private void AnimationSetDelay()
+    {
+        // Set with the visible state to avoid undesired behaviour when interrupted.
+        isDelayed = !isVisible;
+        if (isDelayed)
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Disables animation and checks that delay was properly set by animation.
+    /// </summary>
+    private void OnAnimationFinished()
+    {
+        onScreenAnimations.enabled = false;
+        AnimationSetDelay();
     }
 }
 
@@ -162,7 +198,7 @@ public static class OnScreenMessagesHandler
 
         if(_newText.Length > 0)
         {
-            onScreenMessage.SetCanvasVisible(true);
+            onScreenMessage.SetContainerVisible(true);
             onScreenMessage.SetText(_newText);
         }
     }
@@ -172,7 +208,7 @@ public static class OnScreenMessagesHandler
     /// </summary>
     public static void DisableScreenMessage()
     {
-        onScreenMessage.SetCanvasVisible(false);
+        onScreenMessage.SetContainerVisible(false);
     }
 
     /// <summary>
@@ -203,7 +239,7 @@ public static class OnScreenMessagesHandler
         Debug.Log("Time out started");
         if(timer.IsTimerDone)
         {
-            onScreenMessage.SetCanvasVisible(true);
+            onScreenMessage.SetContainerVisible(true);
             timer.SetTimer(SCREENMESSAGE_DURATION);
             timer.StartTimer(_caller);
             while(!timer.IsTimerDone)
@@ -212,7 +248,7 @@ public static class OnScreenMessagesHandler
             }
             if(!AreDependenciesMissing())
             {
-                onScreenMessage.SetCanvasVisible(false);
+                onScreenMessage.SetContainerVisible(false);
             }
         }
         yield return null;
