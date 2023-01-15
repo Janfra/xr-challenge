@@ -110,7 +110,6 @@ public class PlayerJump
         }
 
         _inputs.Player.Jumping.canceled += context => StopJumping();
-
         _inputs.Player.Jumping.started += context => ResetTimeSinceJump();
     }
 
@@ -248,6 +247,12 @@ public class PlayerJump
         _distance += minDistance;
         float opacity = Mathf.Clamp((_distance - minDistance) / ((LAND_MARK_DISTANCE_SHOW + minDistance) - minDistance), 0, LAND_MARK_MAX_OPACITY);
         return opacity;
+    }
+
+    public void OnDestroy(PlayerInputs _inputs)
+    {
+        _inputs.Player.Jumping.canceled -= context => StopJumping();
+        _inputs.Player.Jumping.started -= context => ResetTimeSinceJump();
     }
 
     /// <summary>

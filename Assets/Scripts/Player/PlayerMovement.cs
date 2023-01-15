@@ -41,21 +41,19 @@ public class PlayerMovement
         _inputs.Player.Move.canceled += context => playerInput = Vector2.zero;
     }
 
+    /// <summary>
+    /// Gets the player inputs required to run logic
+    /// </summary>
     public void GetInputs()
     {
         movementInput = GetMovementInput();
         movementDirection = GetRotationOffsetInput();
     }
 
-    public void HandleMovement()
-    {
-        MovePlayer();
-    }
-
     /// <summary>
-    /// Moves the player using the inputs.
+    /// Moves the player using the inputs if not colliding with a wall
     /// </summary>
-    private void MovePlayer()
+    public void HandleMovement()
     {
         if (!IsCollidingWithWall())
         {
@@ -95,6 +93,16 @@ public class PlayerMovement
         Vector3 targetPos = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z) * GetMovementInput();
         targetPos *= COLLISION_DECTECTION_DISTANCE_OFFSET;
         return targetPos;
+    }
+
+    /// <summary>
+    /// Unsubscribes from events on destroy
+    /// </summary>
+    /// <param name="_inputs">Event owner</param>
+    public void OnDestroy(PlayerInputs _inputs)
+    {
+        _inputs.Player.Move.performed -= context => playerInput = context.ReadValue<Vector2>();
+        _inputs.Player.Move.canceled -= context => playerInput = Vector2.zero;
     }
 
     public void OnGizmos()

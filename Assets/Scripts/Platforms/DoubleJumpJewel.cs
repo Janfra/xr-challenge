@@ -91,14 +91,14 @@ public class DoubleJumpJewel : MonoBehaviour
     private IEnumerator StartJewelEffect()
     {
         isActive = true;
-        jewelEffectVisual.gameObject.SetActive(true);
+        jewelEffectVisual.SetActive(true);
         while (isActive)
         {
             player.EnableJumping();
             SetJewelEffectOnPlayer();
             yield return null;
         }
-        jewelEffectVisual.gameObject.SetActive(false);
+        jewelEffectVisual.SetActive(false);
     }
 
     /// <summary>

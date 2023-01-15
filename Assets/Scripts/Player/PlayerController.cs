@@ -53,6 +53,14 @@ public class PlayerController : MonoBehaviour
         DisableControllers();
     }
 
+    private void OnDestroy()
+    {
+        playerInputs.UI.Pause.started -= context => PauseHandler();
+        jumpHandler.OnDestroy(playerInputs);
+        movementHandler.OnDestroy(playerInputs);
+        Dialogues.OnDialogue -= SetEnabled;
+    }
+
     private void Update()
     {
         if(!isEnabled)
@@ -74,6 +82,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Stops player input and all movement
+    /// </summary>
     private void PauseHandler()
     {
         if (GameManager.Instance.CurrentState != GameManager.GameStates.Pause)
@@ -92,6 +103,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets whether the player controller should be working
+    /// </summary>
+    /// <param name="_isEnabled">Is controller active</param>
     public void SetEnabled(bool _isEnabled)
     {
         isEnabled = _isEnabled;
@@ -105,17 +120,26 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Enables player to jump again for the jump buffer duration
+    /// </summary>
     public void EnableJumping()
     {
         jumpHandler.ResetCoyoteTime();
     }
 
+    /// <summary>
+    /// Disables controllers
+    /// </summary>
     private void DisableControllers()
     {
         playerInputs.Player.Move.Disable();
         playerInputs.Player.Jumping.Disable();
     }
 
+    /// <summary>
+    /// Enables controllers 
+    /// </summary>
     private void EnableControllers()
     {
         playerInputs.Player.Move.Enable();

@@ -149,7 +149,7 @@ public class CameraHandler : MonoBehaviour
     private void AddCoveredObject(GameObject _gameObject)
     {
         coveringObjects.Add(_gameObject);
-        coveringObjectsLayer.Add(_gameObject, _gameObject.gameObject.layer);
+        coveringObjectsLayer.Add(_gameObject, _gameObject.layer);
     }
 
     /// <summary>
