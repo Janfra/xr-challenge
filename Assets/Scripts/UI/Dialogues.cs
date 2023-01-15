@@ -18,7 +18,7 @@ public class Dialogues : MonoBehaviour
 
     #region Variables & Constants
 
-    private bool nextInput => Input.GetKeyDown(KeyCode.E);
+    private bool nextInput = false;
     private int currentDialogue = 0;
     private const float ALERT_Y_MOVEMENT = 0.3f;
 
@@ -34,10 +34,22 @@ public class Dialogues : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(currentDialogue != dialogueText.Length)
+        if(other.TryGetComponent(out PlayerController input))
         {
-            dialogueAlert.SetActive(false);
-            StartCoroutine(StartDialogue());
+            AddInputEvent(input.PlayerInputs);
+            if(currentDialogue != dialogueText.Length)
+            {
+                dialogueAlert.SetActive(false);
+                StartCoroutine(StartDialogue());
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.TryGetComponent(out PlayerController input))
+        {
+            RemoveInputEvent(input.PlayerInputs);
         }
     }
 
@@ -73,7 +85,7 @@ public class Dialogues : MonoBehaviour
     }
 
     /// <summary>
-    /// Moves the alert game object up and down.
+    /// Moves the alert game object up and down
     /// </summary>
     /// <returns></returns>
     private IEnumerator MoveAlert()
@@ -101,5 +113,26 @@ public class Dialogues : MonoBehaviour
             dialogueAlert.transform.position = Vector3.Lerp(firstPos, secondPos, Mathf.Clamp01(time));
             yield return null;
         }
+    }
+
+    /// <summary>
+    /// Subscribes to the player input to set the next input to the interact input
+    /// </summary>
+    /// <param name="_input"></param>
+    public void AddInputEvent(PlayerInputs _input)
+    {
+        _input.Player.Interact.started += context => nextInput = true;
+        _input.Player.Interact.canceled += context => nextInput = false;
+    }
+
+    /// <summary>
+    /// Unsubscribes to the player input setting the next input
+    /// </summary>
+    /// <param name="_input"></param>
+    public void RemoveInputEvent(PlayerInputs _input)
+    {
+        _input.Player.Interact.started -= context => nextInput = true;
+        _input.Player.Interact.canceled -= context => nextInput = false;
+        nextInput = false;
     }
 }

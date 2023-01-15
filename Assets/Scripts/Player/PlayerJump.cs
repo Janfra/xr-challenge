@@ -249,6 +249,10 @@ public class PlayerJump
         return opacity;
     }
 
+    /// <summary>
+    /// Unsubscribes from events on destroy
+    /// </summary>
+    /// <param name="_inputs">Event owner</param>
     public void OnDestroy(PlayerInputs _inputs)
     {
         _inputs.Player.Jumping.canceled -= context => StopJumping();

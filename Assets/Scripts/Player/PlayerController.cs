@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private Rigidbody playerRigidbody;
     private PlayerInputs playerInputs;
+    public PlayerInputs PlayerInputs => playerInputs;
      
     #region Components
 
