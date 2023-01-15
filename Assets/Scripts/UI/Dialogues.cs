@@ -101,6 +101,5 @@ public class Dialogues : MonoBehaviour
             dialogueAlert.transform.position = Vector3.Lerp(firstPos, secondPos, Mathf.Clamp01(time));
             yield return null;
         }
-        Debug.Log("Finished");
     }
 }

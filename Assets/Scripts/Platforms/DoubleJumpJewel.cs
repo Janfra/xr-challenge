@@ -46,7 +46,7 @@ public class DoubleJumpJewel : MonoBehaviour
 
     private void OnValidate()
     {
-        LayerCheck.CheckLayerIndex(ref disableLayerIndex);
+        LayerCheck.CheckLayerIndex(ref disableLayerIndex, false);
     }
 
     private void Awake()

@@ -39,7 +39,7 @@ public class CameraHandler : MonoBehaviour
 
     private void OnValidate()
     {
-        LayerCheck.CheckLayerIndex(ref layerSwapIndex);
+        LayerCheck.CheckLayerIndex(ref layerSwapIndex, false);
     }
 
     private void Awake()

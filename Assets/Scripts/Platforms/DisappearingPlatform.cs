@@ -252,7 +252,7 @@ public class DisappearingPlatform : MonoBehaviour
 
         public void OnValidate()
         {
-            LayerCheck.CheckLayerIndex(ref layerSwapIndex);
+            LayerCheck.CheckLayerIndex(ref layerSwapIndex, false);
         }
     }
 
