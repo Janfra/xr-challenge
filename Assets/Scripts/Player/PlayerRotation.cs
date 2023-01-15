@@ -36,16 +36,20 @@ public class PlayerRotation
 
     #endregion
 
+    private Vector2 mousePosition;
+
     /// <summary>
     /// Initializes the class
     /// </summary>
-    public void Init()
+    public void Init(PlayerInputs _input)
     {
         cam = Camera.main;
         if(pointerOnWorld == null)
         {
             Debug.LogWarning("No pointer assigned on player rotation");
         }
+
+        _input.Player.Look.performed += context => mousePosition = context.ReadValue<Vector2>();
     }
 
     /// <summary>
@@ -53,7 +57,7 @@ public class PlayerRotation
     /// </summary>
     public void GetRotation(Transform _transform)
     {
-        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        Ray ray = cam.ScreenPointToRay(mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, hitOnlyLayers))
         {
             Vector3 hitPos = hit.point;
@@ -117,5 +121,10 @@ public class PlayerRotation
         _hitPos.y = _transform.position.y;
         Vector3 rotation = _hitPos - _transform.position;
         _transform.forward = rotation;
+    }
+
+    public void OnDestroy(PlayerInputs _input)
+    {
+        _input.Player.Look.performed -= context => mousePosition = context.ReadValue<Vector2>();
     }
 }

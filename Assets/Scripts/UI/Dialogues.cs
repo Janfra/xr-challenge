@@ -59,7 +59,7 @@ public class Dialogues : MonoBehaviour
     /// <returns></returns>
     private IEnumerator StartDialogue()
     {
-        OnDialogue?.Invoke(true);
+        OnDialogue?.Invoke(false);
 
         OnScreenMessagesHandler.SetScreenMessage(dialogueText[currentDialogue]);
         while(currentDialogue != dialogueText.Length || OnScreenMessagesHandler.IsTextLoading())
@@ -81,7 +81,7 @@ public class Dialogues : MonoBehaviour
 
         yield return null;
         OnScreenMessagesHandler.DisableScreenMessage();
-        OnDialogue?.Invoke(false);
+        OnDialogue?.Invoke(true);
     }
 
     /// <summary>
@@ -121,7 +121,11 @@ public class Dialogues : MonoBehaviour
     /// <param name="_input"></param>
     public void AddInputEvent(PlayerInputs _input)
     {
-        _input.Player.Interact.started += context => nextInput = true;
+        Debug.Log("Subscribed to player input");
+        _input.Player.Interact.started += context =>
+        {
+            nextInput = true;
+        };
         _input.Player.Interact.canceled += context => nextInput = false;
     }
 
@@ -131,8 +135,14 @@ public class Dialogues : MonoBehaviour
     /// <param name="_input"></param>
     public void RemoveInputEvent(PlayerInputs _input)
     {
-        _input.Player.Interact.started -= context => nextInput = true;
+        Debug.Log("Unsubscribed to player input");
+        _input.Player.Interact.started -= context =>
+        {
+            nextInput = true;
+        };
         _input.Player.Interact.canceled -= context => nextInput = false;
         nextInput = false;
     }
+
+
 }

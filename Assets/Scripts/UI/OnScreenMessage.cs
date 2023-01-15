@@ -214,7 +214,7 @@ public static class OnScreenMessagesHandler
     /// <summary>
     /// Returns if the text on screen is loading
     /// </summary>
-    /// <returns>Is the text loading</returns>
+    /// <returns>If the text finished loading return false, otherwise true</returns>
     public static bool IsTextLoading()
     {
         return onScreenMessage.IsLoading;

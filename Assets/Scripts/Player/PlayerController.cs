@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private bool isEnabled;
+    private bool isEnabled = true;
 
     [Header("Dependencies")]
     [SerializeField]
@@ -38,7 +38,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         movementHandler.Init(transform, playerInputs);
-        rotationHandler.Init();
+        rotationHandler.Init(playerInputs);
         jumpHandler.Init(playerInputs);
 
         Dialogues.OnDialogue += SetEnabled; 
@@ -47,6 +47,7 @@ public class PlayerController : MonoBehaviour
     private void OnEnable()
     {
         EnableControllers();
+        playerInputs.Player.Interact.Enable();
     }
 
     private void OnDisable()
@@ -59,24 +60,29 @@ public class PlayerController : MonoBehaviour
         playerInputs.UI.Pause.started -= context => PauseHandler();
         jumpHandler.OnDestroy(playerInputs);
         movementHandler.OnDestroy(playerInputs);
+        rotationHandler.OnDestroy(playerInputs);
         Dialogues.OnDialogue -= SetEnabled;
     }
 
+    /// <summary>
+    /// Updates variables for logic
+    /// </summary>
     private void Update()
     {
-        if(!isEnabled)
+        if(isEnabled)
         {
             jumpHandler.OnUpdate();
             movementHandler.GetInputs();
             rotationHandler.GetRotation(transform);
         }
-
-        PauseHandler();
     }
 
+    /// <summary>
+    /// Runs physics base logic
+    /// </summary>
     private void FixedUpdate()
     {
-        if (!isEnabled)
+        if (isEnabled)
         {
             jumpHandler.HandleJump();
             movementHandler.HandleMovement();
@@ -110,6 +116,7 @@ public class PlayerController : MonoBehaviour
     /// <param name="_isEnabled">Is controller active</param>
     public void SetEnabled(bool _isEnabled)
     {
+        Debug.Log($"Set player controller to be {_isEnabled}");
         isEnabled = _isEnabled;
         if (isEnabled)
         {
@@ -134,8 +141,10 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void DisableControllers()
     {
+        Debug.Log("Disabled player controllers");
         playerInputs.Player.Move.Disable();
         playerInputs.Player.Jumping.Disable();
+        playerInputs.Player.Look.Disable();
     }
 
     /// <summary>
@@ -143,8 +152,10 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void EnableControllers()
     {
+        Debug.Log("Enabled player controllers");
         playerInputs.Player.Move.Enable();
         playerInputs.Player.Jumping.Enable();
+        playerInputs.Player.Look.Enable();
     }
 
     private void OnDrawGizmos()
