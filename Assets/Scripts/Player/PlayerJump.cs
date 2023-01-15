@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 [System.Serializable]
 public class PlayerJump
@@ -101,26 +102,25 @@ public class PlayerJump
     /// <summary>
     /// Initializes class
     /// </summary>
-    public void Init()
+    public void Init(PlayerInputs _inputs)
     {
         if(groundCheck == null)
         {
             Debug.LogError("No ground check assigned on player");
         }
+
+        _inputs.Player.Jumping.canceled += context => StopJumping();
+
+        _inputs.Player.Jumping.started += context => ResetTimeSinceJump();
     }
 
     /// <summary>
-    /// Gets all inputs required for the component to work
+    /// Updates values required for logic to work
     /// </summary>
-    public void GetInputs()
+    public void OnUpdate()
     {
         UpdateJumpBuffer();
         IsPlayerOnGroundUpdate();
-
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            StopJumping();
-        }
     }
 
     /// <summary>
@@ -167,15 +167,16 @@ public class PlayerJump
     /// </summary>
     private void UpdateJumpBuffer()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            TimeSinceJump = jumpBufferTime;
-        }
-        else
-        {
-            TimeSinceJump -= Time.deltaTime;
-            timeDelayToJump -= Time.deltaTime;
-        }
+        TimeSinceJump -= Time.deltaTime;
+        timeDelayToJump -= Time.deltaTime;
+    }
+
+    /// <summary>
+    /// Resets the time since jump to the buffer time
+    /// </summary>
+    private void ResetTimeSinceJump()
+    {
+        TimeSinceJump = jumpBufferTime;
     }
 
     /// <summary>

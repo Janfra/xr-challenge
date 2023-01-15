@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [System.Serializable]
 public class PlayerMovement 
@@ -23,6 +24,7 @@ public class PlayerMovement
 
     #region Variables & Constants
 
+    private Vector2 playerInput;
     private Vector3 movementInput;
     private Vector3 movementDirection;
 
@@ -31,9 +33,12 @@ public class PlayerMovement
 
     #endregion
 
-    public void Init<T>(T _transform) where T : Transform
+    public void Init<T>(T _transform, PlayerInputs _inputs) where T : Transform
     {
         transform = _transform;
+
+        _inputs.Player.Move.performed += context => playerInput = context.ReadValue<Vector2>();
+        _inputs.Player.Move.canceled += context => playerInput = Vector2.zero;
     }
 
     public void GetInputs()
@@ -64,8 +69,8 @@ public class PlayerMovement
     /// <returns>Normalised player movement</returns>
     private Vector3 GetMovementInput()
     {
-        Vector3 forwardMove = speed * Input.GetAxisRaw("Vertical") * Vector3.forward;
-        Vector3 lateralMove = speed / SIDEWAYS_PENALTY * Input.GetAxisRaw("Horizontal") * Vector3.right;
+        Vector3 forwardMove = speed * Mathf.RoundToInt(playerInput.y) * Vector3.forward;
+        Vector3 lateralMove = speed / SIDEWAYS_PENALTY * Mathf.RoundToInt(playerInput.x) * Vector3.right;
         Vector3 resultingMovement = forwardMove + lateralMove;
         resultingMovement.Normalize();
 
