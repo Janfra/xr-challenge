@@ -186,6 +186,10 @@ public class PlayerRotation
     public void OnDestroy(PlayerInputs _input)
     {
         _input.Player.Look.performed -= context => lookAtPosition = context.ReadValue<Vector2>();
-        _input.Player.Move.performed -= context => lookAtPosition = context.ReadValue<Vector2>();
+        _input.Player.Move.performed -= context =>
+        {
+            Vector2 moveDirection = context.ReadValue<Vector2>();
+            lookAtPosition = new Vector3(moveDirection.x, 0, moveDirection.y);
+        };
     }
 }
