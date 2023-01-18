@@ -60,13 +60,18 @@ public class PlayerRotation
         if (isGamepad)
         {
             Debug.Log("Gamepad is active, set onRotate to Gamepad rotation");
-            // onRotate = GetGamepadRotation;
+            _input.Player.Move.performed += context =>
+            {
+                Vector2 moveDirection = context.ReadValue<Vector2>();
+                lookAtPosition = new Vector3(moveDirection.x, 0, moveDirection.y);
+            };
+
+            onRotate = GetGamepadRotation;
         }
         else
         {
             onRotate = GetCursorRotation;
         }
-        _input.Player.Look.performed += context => lookAtPosition = context.ReadValue<Vector2>();
     }
 
     /// <summary>
@@ -103,9 +108,14 @@ public class PlayerRotation
         }
     }
 
+    /// <summary>
+    /// Sets the player rotation based on movement
+    /// </summary>
+    /// <param name="_transform"></param>
     private void GetGamepadRotation(Transform _transform)
     {
         // Do gamepad rotation logic
+        RotateTowardsPoint(lookAtPosition + _transform.position, _transform);
     }
 
     /// <summary>
@@ -176,5 +186,6 @@ public class PlayerRotation
     public void OnDestroy(PlayerInputs _input)
     {
         _input.Player.Look.performed -= context => lookAtPosition = context.ReadValue<Vector2>();
+        _input.Player.Move.performed -= context => lookAtPosition = context.ReadValue<Vector2>();
     }
 }

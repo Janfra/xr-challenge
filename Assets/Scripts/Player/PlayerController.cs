@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -32,7 +33,11 @@ public class PlayerController : MonoBehaviour
             playerRigidbody = GetComponent<Rigidbody>();
         }
 
-        playerInputs.UI.Pause.started += context => PauseHandler();
+        playerInputs.UI.Pause.started += context => 
+        {
+            Debug.Log("Paused");
+            PauseHandler();
+        };
     }
 
     private void Start()
@@ -48,11 +53,14 @@ public class PlayerController : MonoBehaviour
     {
         EnableControllers();
         playerInputs.Player.Interact.Enable();
+        playerInputs.UI.Enable();
     }
 
     private void OnDisable()
     {
         DisableControllers();
+        playerInputs.Player.Interact.Disable();
+        playerInputs.UI.Disable();
     }
 
     private void OnDestroy()
@@ -96,14 +104,14 @@ public class PlayerController : MonoBehaviour
     {
         if (GameManager.Instance.CurrentState != GameManager.GameStates.Pause)
         {
-            SetEnabled(true);
+            SetEnabled(false);
             playerRigidbody.useGravity = false;
             playerRigidbody.Sleep();
             GameManager.Instance.UpdateState(GameManager.GameStates.Pause);
         }
         else
         {
-            SetEnabled(false);
+            SetEnabled(true);
             playerRigidbody.useGravity = true;
             playerRigidbody.WakeUp();
             GameManager.Instance.UpdateState(GameManager.GameStates.Main);

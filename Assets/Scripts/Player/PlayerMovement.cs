@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,9 +25,11 @@ public class PlayerMovement
 
     #region Variables & Constants
 
+    private bool isGamepad = Gamepad.current != null && Gamepad.current.enabled;
     private Vector2 playerInput;
     private Vector3 movementInput;
     private Vector3 movementDirection;
+    private Func<Vector3> onGetMovement;
 
     private const float COLLISION_DECTECTION_DISTANCE_OFFSET = 0.6f;
     private const float SIDEWAYS_PENALTY = 2f;
@@ -39,6 +42,15 @@ public class PlayerMovement
 
         _inputs.Player.Move.performed += context => playerInput = context.ReadValue<Vector2>();
         _inputs.Player.Move.canceled += context => playerInput = Vector2.zero;
+
+        if (isGamepad)
+        {
+            onGetMovement = GetFowardMovementInput;
+        }
+        else
+        {
+            onGetMovement = GetOmniDirectionalMovementInput;
+        }
     }
 
     /// <summary>
@@ -46,7 +58,7 @@ public class PlayerMovement
     /// </summary>
     public void GetInputs()
     {
-        movementInput = GetMovementInput();
+        movementInput = onGetMovement.Invoke();
         movementDirection = GetRotationOffsetInput();
     }
 
@@ -57,7 +69,9 @@ public class PlayerMovement
     {
         if (!IsCollidingWithWall())
         {
-            transform.Translate(speed * Time.deltaTime * movementInput);
+            Vector3 newPosition = speed * Time.deltaTime * movementInput;
+            transform.Translate(newPosition);
+            Debug.Log(newPosition.x + newPosition.y + newPosition.z);
         }
     }
 
@@ -65,7 +79,7 @@ public class PlayerMovement
     /// Get the inputs for movement based on player, add them and normalise them for consistency.
     /// </summary>
     /// <returns>Normalised player movement</returns>
-    private Vector3 GetMovementInput()
+    private Vector3 GetOmniDirectionalMovementInput()
     {
         Vector3 forwardMove = speed * Mathf.RoundToInt(playerInput.y) * Vector3.forward;
         Vector3 lateralMove = speed / SIDEWAYS_PENALTY * Mathf.RoundToInt(playerInput.x) * Vector3.right;
@@ -73,6 +87,13 @@ public class PlayerMovement
         resultingMovement.Normalize();
 
         return resultingMovement;
+    }
+
+    private Vector3 GetFowardMovementInput()
+    {
+        float movementMagnitude = playerInput.magnitude;
+        Vector3 forwardMove = movementMagnitude * Vector3.forward;
+        return forwardMove;
     }
 
     /// <summary>
@@ -90,7 +111,7 @@ public class PlayerMovement
     /// <returns>Input movement direction</returns>
     private Vector3 GetRotationOffsetInput()
     {
-        Vector3 targetPos = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z) * GetMovementInput();
+        Vector3 targetPos = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z) * GetOmniDirectionalMovementInput();
         targetPos *= COLLISION_DECTECTION_DISTANCE_OFFSET;
         return targetPos;
     }

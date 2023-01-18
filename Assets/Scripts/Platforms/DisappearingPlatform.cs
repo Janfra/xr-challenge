@@ -46,7 +46,10 @@ public class DisappearingPlatform : MonoBehaviour
 
     private void OnPause(GameManager.GameStates _gameState)
     {
-        timer.PauseTimer(_gameState == GameManager.GameStates.Pause);
+        if (!timer.IsTimerDone)
+        {
+            timer.PauseTimer(_gameState == GameManager.GameStates.Pause);
+        }
     }
 
     private void OnValidate()
