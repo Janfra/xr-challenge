@@ -74,7 +74,7 @@ public class Dialogues : MonoBehaviour
             }
             else if(nextInput && OnScreenMessagesHandler.IsTextLoading())
             {
-                OnScreenMessagesHandler.CancelLoading();
+                OnScreenMessagesHandler.CancelLoading();    
             }
             yield return null;
         }
