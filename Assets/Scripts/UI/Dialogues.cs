@@ -70,11 +70,14 @@ public class Dialogues : MonoBehaviour
                 if (currentDialogue != dialogueText.Length)
                 {
                     OnScreenMessagesHandler.SetScreenMessage(dialogueText[Mathf.Clamp(currentDialogue, 0, dialogueText.Length - 1)]);
+                    
+                    // Cancels next input, otherwise stops loading permanently
+                    nextInput = false;
                 }
             }
             else if(nextInput && OnScreenMessagesHandler.IsTextLoading())
             {
-                OnScreenMessagesHandler.CancelLoading();    
+                OnScreenMessagesHandler.CancelLoading();
             }
             yield return null;
         }
@@ -126,7 +129,11 @@ public class Dialogues : MonoBehaviour
         {
             nextInput = true;
         };
-        _input.Player.Interact.canceled += context => nextInput = false;
+
+        _input.Player.Interact.canceled += context =>
+        {
+            nextInput = false;
+        };
     }
 
     /// <summary>
@@ -140,7 +147,11 @@ public class Dialogues : MonoBehaviour
         {
             nextInput = true;
         };
-        _input.Player.Interact.canceled -= context => nextInput = false;
+
+        _input.Player.Interact.canceled -= context =>
+        {
+            nextInput = false;
+        };
         nextInput = false;
     }
 
