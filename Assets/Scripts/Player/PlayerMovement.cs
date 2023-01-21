@@ -25,7 +25,7 @@ public class PlayerMovement
 
     #region Variables & Constants
 
-    private bool isGamepad = Gamepad.current != null && Gamepad.current.enabled;
+    private bool isGamepad = false;
     private Vector2 playerInput;
     private Vector3 movementInput;
     private Vector3 movementDirection;
@@ -36,13 +36,36 @@ public class PlayerMovement
 
     #endregion
 
-    public void Init<T>(T _transform, PlayerInputs _inputs) where T : Transform
+    public void Init(PlayerController _playerController)
     {
-        transform = _transform;
+        // Use player transform for movement
+        transform = _playerController.transform;
 
-        _inputs.Player.Move.performed += context => playerInput = context.ReadValue<Vector2>();
-        _inputs.Player.Move.canceled += context => playerInput = Vector2.zero;
+        // Subscribe to all relevant events
+        _playerController.PlayerInputs.Player.Move.performed += context => playerInput = context.ReadValue<Vector2>();
+        _playerController.PlayerInputs.Player.Move.canceled += context => playerInput = Vector2.zero;
 
+        DeviceUpdateSetup(_playerController);
+    }
+
+    /// <summary>
+    /// Sets up the device update event and starting device type
+    /// </summary>
+    /// <param name="_playerController">Event caller for updating device</param>
+    private void DeviceUpdateSetup(PlayerController _playerController)
+    {
+        isGamepad = Gamepad.current != null;
+        OnDeviceUpdated(isGamepad);
+        _playerController.OnDeviceUpdate += (_isGamepad, _playerInputs) => OnDeviceUpdated(_isGamepad);
+    }
+
+    /// <summary>
+    /// Sets whether the player is currently using a gamepad for movement
+    /// </summary>
+    /// <param name="_isGamepad">True if gamepad is connected</param>
+    private void OnDeviceUpdated(bool _isGamepad)
+    {
+        isGamepad = _isGamepad;
         if (isGamepad)
         {
             onGetMovement = GetFowardMovementInput;
@@ -71,12 +94,11 @@ public class PlayerMovement
         {
             Vector3 newPosition = speed * Time.deltaTime * movementInput;
             transform.Translate(newPosition);
-            Debug.Log(newPosition.x + newPosition.y + newPosition.z);
         }
     }
 
     /// <summary>
-    /// Get the inputs for movement based on player, add them and normalise them for consistency.
+    /// Get the inputs for movement on all directions, add them and normalise them for consistency.
     /// </summary>
     /// <returns>Normalised player movement</returns>
     private Vector3 GetOmniDirectionalMovementInput()
@@ -89,6 +111,10 @@ public class PlayerMovement
         return resultingMovement;
     }
 
+    /// <summary>
+    /// Get the movement based only on the forward direction of the player
+    /// </summary>
+    /// <returns>Foward movement based on input</returns>
     private Vector3 GetFowardMovementInput()
     {
         float movementMagnitude = playerInput.magnitude;

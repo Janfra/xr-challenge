@@ -1,15 +1,26 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Users;
 
 public class PlayerController : MonoBehaviour
 {
+    /// <summary>
+    /// Called when there is a change in input device. 
+    /// Bool is for is gamepad being used
+    /// </summary>
+    public Action<bool, PlayerInputs> OnDeviceUpdate;
     private bool isEnabled = true;
+
+    #region Dependencies
 
     [Header("Dependencies")]
     [SerializeField]
     private Rigidbody playerRigidbody;
     private PlayerInputs playerInputs;
     public PlayerInputs PlayerInputs => playerInputs;
+
+    #endregion
      
     #region Components
 
@@ -42,11 +53,11 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        movementHandler.Init(transform, playerInputs);
-        rotationHandler.Init(playerInputs);
+        movementHandler.Init(this);
+        rotationHandler.Init(this);
         jumpHandler.Init(playerInputs);
 
-        Dialogues.OnDialogue += SetEnabled; 
+        Dialogues.OnDialogue += SetControllersEnabled; 
     }
 
     private void OnEnable()
@@ -54,6 +65,8 @@ public class PlayerController : MonoBehaviour
         EnableControllers();
         playerInputs.Player.Interact.Enable();
         playerInputs.UI.Enable();
+        InputSystem.onDeviceChange += OnDeviceChanged;
+        InputUser.onChange += OnControlSchemeChanged;
     }
 
     private void OnDisable()
@@ -61,6 +74,7 @@ public class PlayerController : MonoBehaviour
         DisableControllers();
         playerInputs.Player.Interact.Disable();
         playerInputs.UI.Disable();
+        InputSystem.onDeviceChange -= OnDeviceChanged;
     }
 
     private void OnDestroy()
@@ -69,7 +83,7 @@ public class PlayerController : MonoBehaviour
         jumpHandler.OnDestroy(playerInputs);
         movementHandler.OnDestroy(playerInputs);
         rotationHandler.OnDestroy(playerInputs);
-        Dialogues.OnDialogue -= SetEnabled;
+        Dialogues.OnDialogue -= SetControllersEnabled;
     }
 
     /// <summary>
@@ -104,14 +118,14 @@ public class PlayerController : MonoBehaviour
     {
         if (GameManager.Instance.CurrentState != GameManager.GameStates.Pause)
         {
-            SetEnabled(false);
+            SetControllersEnabled(false);
             playerRigidbody.useGravity = false;
             playerRigidbody.Sleep();
             GameManager.Instance.UpdateState(GameManager.GameStates.Pause);
         }
         else
         {
-            SetEnabled(true);
+            SetControllersEnabled(true);
             playerRigidbody.useGravity = true;
             playerRigidbody.WakeUp();
             GameManager.Instance.UpdateState(GameManager.GameStates.Main);
@@ -122,7 +136,7 @@ public class PlayerController : MonoBehaviour
     /// Sets whether the player controller should be working
     /// </summary>
     /// <param name="_isEnabled">Is controller active</param>
-    public void SetEnabled(bool _isEnabled)
+    public void SetControllersEnabled(bool _isEnabled)
     {
         Debug.Log($"Set player controller to be {_isEnabled}");
         isEnabled = _isEnabled;
@@ -145,7 +159,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Disables controllers
+    /// Disables movement controllers
     /// </summary>
     private void DisableControllers()
     {
@@ -156,7 +170,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Enables controllers 
+    /// Enables movement controllers 
     /// </summary>
     private void EnableControllers()
     {
@@ -164,6 +178,64 @@ public class PlayerController : MonoBehaviour
         playerInputs.Player.Move.Enable();
         playerInputs.Player.Jumping.Enable();
         playerInputs.Player.Look.Enable();
+    }
+
+    /// <summary>
+    /// Updates based on device change
+    /// </summary>
+    /// <param name="_device"></param>
+    /// <param name="_deviceChange"></param>
+    private void OnDeviceChanged(InputDevice _device, InputDeviceChange _deviceChange)
+    {
+        // Log info
+        const int MAX_STRING_SIZE = 10;
+        string deviceName = _device.ToString().Substring(0, MAX_STRING_SIZE);
+        Debug.Log($"Device {_deviceChange}: {deviceName}, Device type: {_device.displayName}");
+
+        switch (_deviceChange)
+        {
+            case InputDeviceChange.Added:
+            case InputDeviceChange.Reconnected:
+                // Logic for new controller or reconnecting
+                break;
+
+            case InputDeviceChange.Removed:
+            case InputDeviceChange.Disconnected:
+                bool isGamepadAvailable = Gamepad.current != null;
+                if (!isGamepadAvailable)
+                {
+                    Debug.Log("No gamepad controllers available, switching to keyboard controllers!");
+                    OnDeviceUpdate?.Invoke(false, playerInputs);
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Calls event to update current input device type used
+    /// </summary>
+    /// <param name="_inputUser">Current control scheme used</param>
+    /// <param name="_inputChange">Type of input change</param>
+    private void OnControlSchemeChanged(InputUser _inputUser, InputUserChange _inputChange, InputDevice _device)
+    {
+        switch (_inputChange)
+        {
+            case InputUserChange.ControlSchemeChanged:
+                // Get scheme name and check if it is gamepad
+                string currentSchemeName = _inputUser.controlScheme.Value.name;
+                bool isGamepad = currentSchemeName == "Gamepad";
+
+                // Update controller type
+                OnDeviceUpdate?.Invoke(isGamepad, playerInputs);
+                Debug.Log($"Current Scheme is: {currentSchemeName}");
+                break;
+
+            default:
+                break;
+        }
     }
 
     private void OnDrawGizmos()

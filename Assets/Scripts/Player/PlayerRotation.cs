@@ -39,7 +39,7 @@ public class PlayerRotation
     #endregion
 
     private Vector3 lookAtPosition;
-    private bool isGamepad => Gamepad.current != null && Gamepad.current.enabled;
+    private bool isGamepad = false;
 
     /// <summary>
     /// Delegate to run current type of rotation, cursor or gamepad.
@@ -49,7 +49,7 @@ public class PlayerRotation
     /// <summary>
     /// Initializes the class
     /// </summary>
-    public void Init(PlayerInputs _input)
+    public void Init(PlayerController _playerController)
     {
         cam = Camera.main;
         if(pointerOnWorld == null)
@@ -57,10 +57,33 @@ public class PlayerRotation
             Debug.LogWarning("No pointer assigned on player rotation");
         }
 
+        DeviceUpdateSetup(_playerController);
+    }
+
+    /// <summary>
+    /// Sets up the device update event and starting device type
+    /// </summary>
+    /// <param name="_playerController">Event caller for updating device</param>
+    private void DeviceUpdateSetup(PlayerController _playerController)
+    {
+        isGamepad = Gamepad.current != null;
+        OnDeviceUpdated(isGamepad, _playerController.PlayerInputs);
+        _playerController.OnDeviceUpdate += OnDeviceUpdated;
+    }
+
+    /// <summary>
+    /// Updates the type of rotation to match current device
+    /// </summary>
+    /// <param name="_isGamepad">If true, set to gamepad, otherwise cursor</param>
+    /// <param name="_inputs">Updates events based on input</param>
+    private void OnDeviceUpdated(bool _isGamepad, PlayerInputs _inputs)
+    {
+        isGamepad = _isGamepad;
+
         if (isGamepad)
         {
             Debug.Log("Gamepad is active, set onRotate to Gamepad rotation");
-            _input.Player.Move.performed += context =>
+            _inputs.Player.Move.performed += context =>
             {
                 Vector2 moveDirection = context.ReadValue<Vector2>();
                 lookAtPosition = new Vector3(moveDirection.x, 0, moveDirection.y);
@@ -70,6 +93,12 @@ public class PlayerRotation
         }
         else
         {
+            _inputs.Player.Move.performed -= context =>
+            {
+                Vector2 moveDirection = context.ReadValue<Vector2>();
+                lookAtPosition = new Vector3(moveDirection.x, 0, moveDirection.y);
+            };
+
             onRotate = GetCursorRotation;
         }
     }
@@ -98,9 +127,9 @@ public class PlayerRotation
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, hitOnlyLayers))
         {
-            Vector3 hitPos = hit.point;
-            RotateTowardsPoint(hitPos, _transform);
-            GenerateVisualPoint(hitPos, _transform);
+            lookAtPosition = hit.point;
+            RotateTowardsPoint(lookAtPosition, _transform);
+            GenerateVisualPoint(lookAtPosition, _transform);
         }
         else
         {
@@ -115,20 +144,22 @@ public class PlayerRotation
     private void GetGamepadRotation(Transform _transform)
     {
         // Do gamepad rotation logic
-        RotateTowardsPoint(lookAtPosition + _transform.position, _transform);
+        Vector3 onPlayerLookAtPosition = lookAtPosition + _transform.position;
+        RotateTowardsPoint(onPlayerLookAtPosition, _transform);
+        GenerateVisualPoint(onPlayerLookAtPosition, _transform);
     }
 
     /// <summary>
     /// Moves world pointer to hit position
     /// </summary>
-    /// <param name="_rayCollisionPoint">Mouse position on world</param>
-    private void GenerateVisualPoint(Vector3 _rayCollisionPoint, Transform _transform)
+    /// <param name="_lookAtPosition">Mouse position on world</param>
+    private void GenerateVisualPoint(Vector3 _lookAtPosition, Transform _transform)
     {
         if(pointerOnWorld != null)
         {
             pointerOnWorld.SetActive(true);
-            _rayCollisionPoint.y = _transform.position.y;
-            pointerOnWorld.transform.position = _rayCollisionPoint;
+            _lookAtPosition.y = _transform.position.y;
+            pointerOnWorld.transform.position = _lookAtPosition;
         }
     }
 
