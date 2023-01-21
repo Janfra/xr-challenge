@@ -484,11 +484,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 13195382}
   platformCollider: {fileID: 13195381}
+  layerSwapIndex: 2
   untouchedState:
     platformType: 0
   disappearedState:
     durationTillRegen: 3
-    layerSwapIndex: 5
 --- !u!65 &13195381
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -15844,11 +15844,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 765223781}
   platformCollider: {fileID: 765223780}
+  layerSwapIndex: 2
   untouchedState:
     platformType: 6
   disappearedState:
     durationTillRegen: 1
-    layerSwapIndex: 5
 --- !u!65 &765223780
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -22545,11 +22545,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 1128804410}
   platformCollider: {fileID: 1128804409}
+  layerSwapIndex: 2
   untouchedState:
     platformType: 4
   disappearedState:
     durationTillRegen: 1
-    layerSwapIndex: 5
 --- !u!65 &1128804409
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -26029,11 +26029,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 1301459389}
   platformCollider: {fileID: 1301459388}
+  layerSwapIndex: 2
   untouchedState:
     platformType: 2
   disappearedState:
     durationTillRegen: 1
-    layerSwapIndex: 5
 --- !u!65 &1301459388
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -26804,11 +26804,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 1349079904}
   platformCollider: {fileID: 1349079903}
+  layerSwapIndex: 2
   untouchedState:
     platformType: 2
   disappearedState:
     durationTillRegen: 1
-    layerSwapIndex: 5
 --- !u!65 &1349079903
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -39400,11 +39400,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 1966396703}
   platformCollider: {fileID: 1966396702}
+  layerSwapIndex: 2
   untouchedState:
     platformType: 2
   disappearedState:
     durationTillRegen: 1
-    layerSwapIndex: 5
 --- !u!65 &1966396702
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -42380,11 +42380,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 2133358147}
   platformCollider: {fileID: 2133358145}
+  layerSwapIndex: 2
   untouchedState:
     platformType: 2
   disappearedState:
     durationTillRegen: 1
-    layerSwapIndex: 5
 --- !u!23 &2133358147 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: b03f3d3f0a97de3488561f787c04af5e,
@@ -43022,43 +43022,6 @@ PrefabInstance:
       objectReference: {fileID: 1223057028}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 99369145c16aef04bbfd4728056e4cfb, type: 3}
---- !u!1 &8198941505106771002 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8198941504301641076, guid: 99369145c16aef04bbfd4728056e4cfb,
-    type: 3}
-  m_PrefabInstance: {fileID: 8198941505106771001}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &8198941505106771003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8198941505106771002}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: 092710ace2079504f993b38ae40432b9,
-    type: 3}
-  m_NotificationBehavior: 0
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents: []
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
-  m_DefaultActionMap: Player
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 534669904}
 --- !u!1001 &8749125785921914461
 PrefabInstance:
   m_ObjectHideFlags: 0

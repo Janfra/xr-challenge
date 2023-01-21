@@ -26,6 +26,9 @@ public class DisappearingPlatform : MonoBehaviour
 
     [Header("Config")]
     [SerializeField]
+    [Range(0, 31)]
+    public int layerSwapIndex = 2;
+    [SerializeField]
     private UntouchedState untouchedState;
     [SerializeField]
     private DisappearedState disappearedState;
@@ -35,8 +38,8 @@ public class DisappearingPlatform : MonoBehaviour
     private void Awake()
     {
         timer = new Timer();
-        currentState = untouchedState;
         untouchedState.SetPlatformType(this);
+        SetPlatformState(untouchedState);
     }
 
     private void Start()
@@ -54,7 +57,7 @@ public class DisappearingPlatform : MonoBehaviour
 
     private void OnValidate()
     {
-        disappearedState.OnValidate();
+        LayerCheck.CheckLayerIndex(ref layerSwapIndex, false);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -70,6 +73,12 @@ public class DisappearingPlatform : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         currentState.StartStateLogic(this);
+    }
+
+    private void SetPlatformState(DisappearingStates _newState)
+    {
+        currentState = _newState;
+        currentState.OnSet(this);
     }
 
     private abstract class DisappearingStates
@@ -88,12 +97,12 @@ public class DisappearingPlatform : MonoBehaviour
         /// Initializes the current state
         /// </summary>
         /// <param name="_caller"></param>
-        protected abstract void Init(DisappearingPlatform _caller);
+        protected abstract void SetupLogic(DisappearingPlatform _caller);
         /// <summary>
-        /// Runs on completing state to reset it and run any final logic
+        /// Runs when set to current, resetting it for reusing
         /// </summary>
         /// <param name="_caller"></param>
-        protected abstract void OnComplete(DisappearingPlatform _caller);
+        public abstract void OnSet(DisappearingPlatform _caller);
     }
     
     [System.Serializable]
@@ -101,6 +110,7 @@ public class DisappearingPlatform : MonoBehaviour
     {
         [SerializeField]
         private PlatformTypes platformType = PlatformTypes.QuickFall;
+        Action<DisappearingPlatform> OnSetting;
         private float durationTillFall = 0f;
         private bool isFalling;
 
@@ -109,10 +119,9 @@ public class DisappearingPlatform : MonoBehaviour
             _caller.StartCoroutine(RunStateLogic(_caller));
         }
 
-        protected override void Init(DisappearingPlatform _caller)
+        protected override void SetupLogic(DisappearingPlatform _caller)
         {
             isFalling = true;
-            _caller.timer.SetTimer(durationTillFall);
             _caller.timer.StartTimer(_caller);
         }
 
@@ -120,7 +129,7 @@ public class DisappearingPlatform : MonoBehaviour
         {
             if (!isFalling)
             {
-                Init(_caller);
+                SetupLogic(_caller);
 
                 Color color = _caller.meshRenderer.material.color;
                 while (!_caller.timer.IsTimerDone)
@@ -130,17 +139,35 @@ public class DisappearingPlatform : MonoBehaviour
                     yield return null;
                 }
 
-                OnComplete(_caller);
+                _caller.SetPlatformState(_caller.disappearedState);
             }
             yield return null;
         }
 
-        protected override void OnComplete(DisappearingPlatform _caller)
+        public override void OnSet(DisappearingPlatform _caller)
         {
-            _caller.platformCollider.isTrigger = true;
-            _caller.currentState = _caller.disappearedState;
-            _caller.currentState.StartStateLogic(_caller);
             isFalling = false;
+            _caller.timer.SetTimer(durationTillFall);
+            OnSetting?.Invoke(_caller);
+        }
+
+        /// <summary>
+        /// Logic setting in case of duration of fall being instant.
+        /// </summary>
+        /// <param name="_caller"></param>
+        private void InstantFallSetting(DisappearingPlatform _caller)
+        {
+            _caller.gameObject.layer = _caller.layerSwapIndex;
+            _caller.platformCollider.isTrigger = true;
+        }
+
+        /// <summary>
+        /// Logic setting in case of duration of fall not being instant.
+        /// </summary>
+        /// <param name="_caller"></param>
+        private void TimedFallSetting(DisappearingPlatform _caller)
+        {
+            _caller.platformCollider.isTrigger = false;
         }
 
         /// <summary>
@@ -150,7 +177,16 @@ public class DisappearingPlatform : MonoBehaviour
         {
             durationTillFall = (int)platformType;
             _caller.meshRenderer.material.color = GetPlatformTypeColour(platformType);
+            if(platformType == PlatformTypes.InstantFall)
+            {
+                OnSetting = InstantFallSetting;
+            }
+            else
+            {
+                OnSetting = TimedFallSetting;
+            }
         }
+
 
         /// <summary>
         /// Gets the colour set for the type requested.
@@ -192,9 +228,6 @@ public class DisappearingPlatform : MonoBehaviour
 
         [SerializeField]
         private float durationTillRegen = 1f;
-        [SerializeField]
-        [Range(0, 31)]
-        private int layerSwapIndex = 5;
 
         #endregion
 
@@ -211,12 +244,10 @@ public class DisappearingPlatform : MonoBehaviour
             _caller.StartCoroutine(RunStateLogic(_caller));
         }
 
-        protected override void Init(DisappearingPlatform _caller)
+        protected override void SetupLogic(DisappearingPlatform _caller)
         {
-            initialLayer = _caller.gameObject.layer;
-            _caller.gameObject.layer = layerSwapIndex;
+            _caller.gameObject.layer = _caller.layerSwapIndex;
             isRegenerating = true;
-            _caller.timer.SetTimer(durationTillRegen);
             _caller.timer.StartTimer(_caller);
         }
 
@@ -224,17 +255,19 @@ public class DisappearingPlatform : MonoBehaviour
         {
             if (!isRegenerating)
             {
-                Init(_caller);
+                SetupLogic(_caller);
 
                 Color color = _caller.meshRenderer.material.color;
                 while (!_caller.timer.IsTimerDone)
                 {
+                    // Change opacity based on time left
                     color.a = _caller.timer.GetTimeNormalized();
                     _caller.meshRenderer.material.color = color;
                     yield return null;
                 }
 
-                OnComplete(_caller);
+                _caller.gameObject.layer = initialLayer;
+                _caller.SetPlatformState(_caller.untouchedState);
             }
             else
             {
@@ -245,17 +278,17 @@ public class DisappearingPlatform : MonoBehaviour
             yield return null;
         }
 
-        protected override void OnComplete(DisappearingPlatform _caller)
+        /// <summary>
+        /// Setup the state and start running logic
+        /// </summary>
+        /// <param name="_caller"></param>
+        public override void OnSet(DisappearingPlatform _caller)
         {
-            _caller.platformCollider.isTrigger = false;
-            _caller.gameObject.layer = initialLayer;
-            _caller.currentState = _caller.untouchedState;
+            _caller.platformCollider.isTrigger = true;
+            initialLayer = _caller.gameObject.layer;
             isRegenerating = false;
-        }
-
-        public void OnValidate()
-        {
-            LayerCheck.CheckLayerIndex(ref layerSwapIndex, false);
+            _caller.timer.SetTimer(durationTillRegen);
+            StartStateLogic(_caller);
         }
     }
 
