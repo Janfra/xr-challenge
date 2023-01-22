@@ -1,15 +1,9 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Users;
 
 public class PlayerController : MonoBehaviour
 {
-    /// <summary>
-    /// Called when there is a change in input device. 
-    /// Bool is for is gamepad being used
-    /// </summary>
-    public Action<bool, PlayerInputs> OnDeviceUpdate;
+    public Action<bool, PlayerInputs> OnUpdateInputs;
     private bool isEnabled = true;
 
     #region Dependencies
@@ -56,7 +50,6 @@ public class PlayerController : MonoBehaviour
         movementHandler.Init(this);
         rotationHandler.Init(this);
         jumpHandler.Init(playerInputs);
-
         Dialogues.OnDialogue += SetControllersEnabled;
     }
 
@@ -65,8 +58,7 @@ public class PlayerController : MonoBehaviour
         EnableControllers();
         playerInputs.Player.Interact.Enable();
         playerInputs.UI.Enable();
-        InputSystem.onDeviceChange += OnDeviceChanged;
-        InputUser.onChange += OnControlSchemeChanged;
+        GameManager.OnDeviceUpdate += IsGamepadControlSchemeUsed;
     }
 
     private void OnDisable()
@@ -74,8 +66,7 @@ public class PlayerController : MonoBehaviour
         DisableControllers();
         playerInputs.Player.Interact.Disable();
         playerInputs.UI.Disable();
-        InputSystem.onDeviceChange -= OnDeviceChanged;
-        InputUser.onChange -= OnControlSchemeChanged;
+        GameManager.OnDeviceUpdate -= IsGamepadControlSchemeUsed;
     }
 
     private void OnDestroy()
@@ -180,98 +171,14 @@ public class PlayerController : MonoBehaviour
         playerInputs.Player.Jumping.Enable();
         playerInputs.Player.Look.Enable();
     }
-
+    
     /// <summary>
-    /// Updates based on device change
+    /// Updates inputs to use gamepad or keyboard/mouse controllers 
     /// </summary>
-    /// <param name="_device"></param>
-    /// <param name="_deviceChange"></param>
-    private void OnDeviceChanged(InputDevice _device, InputDeviceChange _deviceChange)
+    /// <param name="_isGamepad">True if gamepad is currently being used</param>
+    private void IsGamepadControlSchemeUsed(bool _isGamepad)
     {
-        // Log info
-        const int MAX_STRING_SIZE = 10;
-        string deviceName = _device.ToString().Substring(0, MAX_STRING_SIZE);
-        Debug.Log($"Device {_deviceChange}: {deviceName}, Device type: {_device.displayName}");
-
-        // Is gamepad available now
-        bool isGamepadAvailable = Gamepad.current != null;
-
-        switch (_deviceChange)
-        {
-            case InputDeviceChange.Added:
-            case InputDeviceChange.Reconnected:
-                if (isGamepadAvailable && IsConnectedDeviceGamepad(_device))
-                {
-                    OnDeviceUpdate?.Invoke(isGamepadAvailable, playerInputs);
-                    Debug.Log("Gamepad available, setting controllers to gamepad!");
-                }
-                break;
-
-            case InputDeviceChange.Removed:
-            case InputDeviceChange.Disconnected:
-                OnDeviceUpdate?.Invoke(isGamepadAvailable, playerInputs);
-                if (!isGamepadAvailable)
-                {
-                    Debug.Log("No gamepad controllers available, switching to keyboard controllers!");
-                }
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Check if device given is in the gamepad list
-    /// </summary>
-    /// <param name="_device">Deviced being checked</param>
-    /// <returns></returns>
-    private bool IsConnectedDeviceGamepad(InputDevice _device)
-    {
-        bool isConnectedDeviceGamepad = false;
-        Gamepad isGamepad = (Gamepad)_device;
-
-        if (isGamepad != null)
-        {
-            foreach (Gamepad gamepad in Gamepad.all)
-            {
-                if (gamepad == isGamepad)
-                {
-                    isConnectedDeviceGamepad = true;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            Debug.Log("Connected device is not a gamepad");
-        }
-
-        return isConnectedDeviceGamepad;
-    }
-
-    /// <summary>
-    /// Calls event to update current input device type used
-    /// </summary>
-    /// <param name="_inputUser">Current control scheme used</param>
-    /// <param name="_inputChange">Type of input change</param>
-    private void OnControlSchemeChanged(InputUser _inputUser, InputUserChange _inputChange, InputDevice _device)
-    {
-        switch (_inputChange)
-        {
-            case InputUserChange.ControlSchemeChanged:
-                // Get scheme name and check if it is gamepad
-                string currentSchemeName = _inputUser.controlScheme.Value.name;
-                bool isGamepad = currentSchemeName == "Gamepad";
-
-                // Update controller type
-                OnDeviceUpdate?.Invoke(isGamepad, playerInputs);
-                Debug.Log($"Current Scheme is: {currentSchemeName}");
-                break;
-
-            default:
-                break;
-        }
+        OnUpdateInputs(_isGamepad, playerInputs);
     }
 
     private void OnDrawGizmos()

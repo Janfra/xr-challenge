@@ -25,7 +25,6 @@ public class PlayerMovement
 
     #region Variables & Constants
 
-    private bool isGamepad = false;
     private Vector2 playerInput;
     private Vector3 movementInput;
     private Vector3 movementDirection;
@@ -54,9 +53,9 @@ public class PlayerMovement
     /// <param name="_playerController">Event caller for updating device</param>
     private void DeviceUpdateSetup(PlayerController _playerController)
     {
-        isGamepad = Gamepad.current != null;
+        bool isGamepad = Gamepad.current != null;
         OnDeviceUpdated(isGamepad);
-        _playerController.OnDeviceUpdate += (_isGamepad, _playerInputs) => OnDeviceUpdated(_isGamepad);
+        _playerController.OnUpdateInputs += (_isGamepad, _playerInputs) => OnDeviceUpdated(_isGamepad);
     }
 
     /// <summary>
@@ -65,8 +64,7 @@ public class PlayerMovement
     /// <param name="_isGamepad">True if gamepad is connected</param>
     private void OnDeviceUpdated(bool _isGamepad)
     {
-        isGamepad = _isGamepad;
-        if (isGamepad)
+        if (_isGamepad)
         {
             onGetMovement = GetFowardMovementInput;
         }

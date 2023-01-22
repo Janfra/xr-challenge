@@ -39,7 +39,6 @@ public class PlayerRotation
     #endregion
 
     private Vector3 lookAtPosition;
-    private bool isGamepad = false;
 
     /// <summary>
     /// Delegate to run current type of rotation, cursor or gamepad.
@@ -66,9 +65,9 @@ public class PlayerRotation
     /// <param name="_playerController">Event caller for updating device</param>
     private void DeviceUpdateSetup(PlayerController _playerController)
     {
-        isGamepad = Gamepad.current != null;
+        bool isGamepad = Gamepad.current != null;
         OnDeviceUpdated(isGamepad, _playerController.PlayerInputs);
-        _playerController.OnDeviceUpdate += OnDeviceUpdated;
+        _playerController.OnUpdateInputs += OnDeviceUpdated;
     }
 
     /// <summary>
@@ -78,9 +77,7 @@ public class PlayerRotation
     /// <param name="_inputs">Updates events based on input</param>
     private void OnDeviceUpdated(bool _isGamepad, PlayerInputs _inputs)
     {
-        isGamepad = _isGamepad;
-
-        if (isGamepad)
+        if (_isGamepad)
         {
             Debug.Log("Gamepad is active, set onRotate to Gamepad rotation");
             _inputs.Player.Move.performed += context =>

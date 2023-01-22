@@ -18,13 +18,15 @@ public class CameraHandler : MonoBehaviour
 
     #endregion
 
-    private Transform currentFollowTarget;
-
     [Header("Dependencies")]
     [SerializeField]
     private Transform playerPosition;
 
-    #region Constants
+    #region Variables & Constants
+
+    private Transform currentFollowTarget;
+
+    private float camHeight;
 
     /// <summary>
     /// Distance kept from the cam to objects
@@ -33,7 +35,8 @@ public class CameraHandler : MonoBehaviour
     /// <summary>
     /// Height difference kept to cam target
     /// </summary>
-    private const float CAM_HEIGHT = 8.5f;
+    private const float MAX_CAM_HEIGHT = 8.5f;
+    private const float MIN_CAM_HEIGHT = 5f;
 
     #endregion
 
@@ -62,6 +65,11 @@ public class CameraHandler : MonoBehaviour
         }
     }
 
+    public void ChangeCameraHeight()
+    {
+        Debug.Log(camHeight == MAX_CAM_HEIGHT ? MIN_CAM_HEIGHT : MAX_CAM_HEIGHT);
+    }
+
     /// <summary>
     /// Sets the target currently being follow by the camera.
     /// </summary>
@@ -87,7 +95,7 @@ public class CameraHandler : MonoBehaviour
     private Vector3 GetCameraPositionOnTarget(Transform _target)
     {
         Vector3 cameraOffsetPosition = _target.position;
-        cameraOffsetPosition.y = YClamp(cameraOffsetPosition.y + CAM_HEIGHT);
+        cameraOffsetPosition.y = YClamp(cameraOffsetPosition.y + MAX_CAM_HEIGHT);
         cameraOffsetPosition.z -= CAM_DISTANCE;
 
         return cameraOffsetPosition;
@@ -115,9 +123,9 @@ public class CameraHandler : MonoBehaviour
         // Shoot ray from the camera to the vector pointing at target position, with the distance in between the camera and the target.
         Ray ray = new Ray(transform.position, currentFollowTarget.position - transform.position);
         float distanceToTarget = Vector3.Distance(transform.position, currentFollowTarget.position);
-        
 
-        if (Physics.Raycast(ray, out RaycastHit hit, distanceToTarget, applicableLayers))
+
+        if(Physics.Raycast(ray, out RaycastHit hit, distanceToTarget, applicableLayers))
         {
             if(hit.transform.position.y > BOTTOM_FLOOR_Y_POS)
             {
@@ -125,7 +133,7 @@ public class CameraHandler : MonoBehaviour
             }
         }
 
-        if (!Physics.Raycast(ray, distanceToTarget, 1 << layerSwapIndex))
+        if(!Physics.Raycast(ray, distanceToTarget, 1 << layerSwapIndex))
         {
             ClearCoveredObjects();
         }
@@ -175,14 +183,14 @@ public class CameraHandler : MonoBehaviour
     /// </summary>
     private void ClearCoveredObjects()
     {
-        if (coveringObjects.Count > 0)
+        if(coveringObjects.Count > 0)
         {
             List<GameObject> removedObjects = new List<GameObject>();
             foreach(GameObject coveringObject in coveringObjects)
             {
                 removedObjects.Add(coveringObject);
             }
-            foreach (var removedObject in removedObjects)
+            foreach(var removedObject in removedObjects)
             {
                 RemoveCoveredObject(removedObject);
             }
@@ -198,14 +206,14 @@ public class CameraHandler : MonoBehaviour
         List<GameObject> removedObjects = new List<GameObject>();
         float targetXPos = _gameObject.transform.position.x;
 
-        foreach (GameObject coveringObject in coveringObjects)
+        foreach(GameObject coveringObject in coveringObjects)
         {
-            if (coveringObject.transform.position.x != targetXPos)
+            if(coveringObject.transform.position.x != targetXPos)
             {
                 removedObjects.Add(coveringObject);
             }
         }
-        foreach (var removedObject in removedObjects)
+        foreach(var removedObject in removedObjects)
         {
             RemoveCoveredObject(removedObject);
         }
