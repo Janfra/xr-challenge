@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour
         rotationHandler.Init(this);
         jumpHandler.Init(playerInputs);
 
-        Dialogues.OnDialogue += SetControllersEnabled; 
+        Dialogues.OnDialogue += SetControllersEnabled;
     }
 
     private void OnEnable()
@@ -257,7 +257,6 @@ public class PlayerController : MonoBehaviour
     /// <param name="_inputChange">Type of input change</param>
     private void OnControlSchemeChanged(InputUser _inputUser, InputUserChange _inputChange, InputDevice _device)
     {
-        Debug.Log("Input Change");
         switch (_inputChange)
         {
             case InputUserChange.ControlSchemeChanged:
