@@ -66,6 +66,7 @@ public class ButtonUI : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointe
     /// <param name="eventData"></param>
     void ISelectHandler.OnSelect(BaseEventData eventData)
     {
+        AudioManager.Instance.TryPlayAudio("ButtonSelect");
         text.color = selectTextColour;
         SetPointerPosition(true);
     }
