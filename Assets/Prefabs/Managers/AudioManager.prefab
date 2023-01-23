@@ -45,6 +45,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Audios:
   - clip: {fileID: 8300000, guid: e37d9a0cac986ad48b8150028c3dba7e, type: 3}
+    volume: 0.75
+    isLoop: 0
+  - clip: {fileID: 8300000, guid: 34191e75f6a5c7e42b62b21e86a102a8, type: 3}
+    volume: 0.75
+    isLoop: 0
+  - clip: {fileID: 8300000, guid: 9b33172638596494eabeb7c1dce68457, type: 3}
+    volume: 0.75
+    isLoop: 0
+  - clip: {fileID: 8300000, guid: 070935a23daebae47b21a966c40c6d93, type: 3}
     volume: 1
-    spatialBlend: 0
+    isLoop: 0
+  - clip: {fileID: 8300000, guid: 050be520f6ddfa141ab12c6d35ea1a62, type: 3}
+    volume: 1
+    isLoop: 0
+  - clip: {fileID: 8300000, guid: a26ea0a5cb6b2114cb0613a39520e531, type: 3}
+    volume: 1
     isLoop: 0

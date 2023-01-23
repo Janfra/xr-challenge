@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class OnScreenMessage : MonoBehaviour
 {
+    private AudioManager audioHandler;
+
     #region Dependencies
 
     [Header("Dependencies")]
@@ -36,6 +38,11 @@ public class OnScreenMessage : MonoBehaviour
     private void Awake()
     {
         OnScreenMessagesHandler.SetDependencies(this);
+    }
+
+    private void Start()
+    {
+        audioHandler = AudioManager.Instance;
     }
 
     /// <summary>
@@ -75,6 +82,7 @@ public class OnScreenMessage : MonoBehaviour
                 tempString += displayText[i];
                 yield return new WaitForSeconds(TEXT_LOADING_DELAY);
                 onScreenText.text = tempString;
+                audioHandler.TryPlayAudio("DialogueLoading");
             }
             else
             {

@@ -5,7 +5,8 @@ using UnityEngine.Audio;
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
-
+    
+    [Header("Dependencies")]
     /// <summary>
     /// Non spatial audios
     /// </summary>
@@ -64,6 +65,27 @@ public class AudioManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Attempts to play the clip by the name given and set its volume
+    /// </summary>
+    /// <param name="_clipName">Name of clip being played</param>
+    /// <param name="_volume">Volume of the clip</param>
+    /// <returns>True if the clip was found, otherwise false</returns>
+    public bool TryPlayAudio(string _clipName, float _volume)
+    {
+        AudioSource clipSource = GetAudioSource(_clipName);
+        if (clipSource)
+        {
+            clipSource.volume = Mathf.Clamp01(_volume);
+            clipSource.Play();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Attemps to stop playing the clip by the name given
     /// </summary>
     /// <param name="_clipName">Name of clip being played</param>
@@ -107,12 +129,19 @@ public class AudioManager : MonoBehaviour
     /// <param name="_source">Source to set up and store</param>
     private void SetAudioSource(Audio _audio, AudioSource _source)
     {
-        audioSources.Add(_audio.Clip.name, _source);
-        _source.loop = _audio.IsLoop;
-        _source.volume = _audio.Volume;
-        _source.clip = _audio.Clip;
+        if (!audioSources.ContainsKey(_audio.Clip.name))
+        {
+            audioSources.Add(_audio.Clip.name, _source);
+            _source.loop = _audio.IsLoop;
+            _source.volume = _audio.Volume;
+            _source.clip = _audio.Clip;
 
-        Debug.Log($"{_audio.Clip.name} was added to the sources!");
+            Debug.Log($"{_audio.Clip.name} was added to the sources!");
+        }
+        else
+        {
+            Debug.LogError($"{_audio.Clip.name} attempted to be added to the sources more than once!");
+        }
     }
 }
 

@@ -49,6 +49,7 @@ public class ButtonUI : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointe
         SetDeselectTextColour();
         SelectTextColourClamp();
         SetPointerMiddleLeftAnchor();
+        button.onClick.AddListener(OnButtonClicked);
     }
 
     /// <summary>
@@ -131,5 +132,10 @@ public class ButtonUI : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointe
         selectionPointer.pivot = new Vector2(0f, 0.5f);
         selectionPointer.anchoredPosition = Vector3.zero;
         selectionPointer.gameObject.SetActive(false);   
+    }
+
+    private void OnButtonClicked()
+    {
+        AudioManager.Instance.TryPlayAudio("ButtonClick");
     }
 }

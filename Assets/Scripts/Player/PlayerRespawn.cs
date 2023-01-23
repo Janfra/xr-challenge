@@ -16,6 +16,7 @@ public class PlayerRespawn : MonoBehaviour
     
     public void RespawnPlayer()
     {
+        AudioManager.Instance.TryPlayAudio("PlayerRespawn");
         transform.position = respawnPoint.position;
     }
 }

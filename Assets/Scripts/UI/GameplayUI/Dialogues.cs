@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Dialogues : MonoBehaviour
 {
+    private AudioManager audioHandler;
     public static event Action<bool> OnDialogue;
 
     #region Config
@@ -30,6 +31,7 @@ public class Dialogues : MonoBehaviour
         {
             StartCoroutine(MoveAlert());
         }
+        audioHandler = AudioManager.Instance;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -69,6 +71,7 @@ public class Dialogues : MonoBehaviour
                 currentDialogue += 1;
                 if (currentDialogue != dialogueText.Length)
                 {
+                    audioHandler.TryPlayAudio("NextDialogue");
                     OnScreenMessagesHandler.SetScreenMessage(dialogueText[Mathf.Clamp(currentDialogue, 0, dialogueText.Length - 1)]);
                     
                     // Cancels next input, otherwise stops loading permanently

@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class DoubleJumpJewel : MonoBehaviour
 {
+    AudioManager audioHandler;
+
     #region Components
 
     private Timer timer;
@@ -60,6 +62,11 @@ public class DoubleJumpJewel : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        audioHandler = AudioManager.Instance;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (player == null)
@@ -92,6 +99,8 @@ public class DoubleJumpJewel : MonoBehaviour
     {
         isActive = true;
         jewelEffectVisual.SetActive(true);
+        audioHandler.TryPlayAudio("JewelPick");
+
         while (isActive)
         {
             player.EnableJumping();
