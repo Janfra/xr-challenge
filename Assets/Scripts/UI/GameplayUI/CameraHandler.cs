@@ -208,7 +208,7 @@ public class CameraHandler : MonoBehaviour
 
         foreach(GameObject coveringObject in coveringObjects)
         {
-            if(coveringObject.transform.position.x != targetXPos)
+            if(Mathf.RoundToInt(coveringObject.transform.position.x) != Mathf.RoundToInt(targetXPos))
             {
                 removedObjects.Add(coveringObject);
             }
@@ -218,4 +218,5 @@ public class CameraHandler : MonoBehaviour
             RemoveCoveredObject(removedObject);
         }
     }
+
 }

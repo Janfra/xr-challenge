@@ -4,15 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PickupEventDelaySubscriber))]
-public abstract class AreaComplete : MonoBehaviour
+public abstract class PickUpSubscriber : MonoBehaviour
 {
-    public event Action OnAreaCompleted;
-
     [Header("Dependencies")]
     [SerializeField]
     private Pickup pickupEnabler;
     [SerializeField]
     private PickupEventDelaySubscriber delaySubscribe;
+    protected Action<Pickup> methodRunOnEvent;
 
     private void Awake()
     {
@@ -29,17 +28,15 @@ public abstract class AreaComplete : MonoBehaviour
         delaySubscribe.OnAfterDelaySubscribe += SubscribeToPickUp;
     }
 
-    protected virtual void OnAreaComplete(Pickup _pickup)
-    {
-        OnAreaCompleted?.Invoke();
-    }
-
     private void SubscribeToPickUp()
     {
         if (pickupEnabler == null)
         {
-            Debug.LogError($"No pickup assigned to complete area on {gameObject.name}!");
+            Debug.LogError($"No pickup assigned to {gameObject.name}! Event added");
         }
-        pickupEnabler.OnPickUp += OnAreaComplete;
+        else
+        {
+            pickupEnabler.OnPickUp += methodRunOnEvent;
+        }
     }
 }

@@ -11,12 +11,35 @@ public class AudioManager : MonoBehaviour
     /// Non spatial audios
     /// </summary>
     [SerializeField]
-    private Audio[] Audios;
+    private Audio[] audios;
 
+    [SerializeField]
     /// <summary>
     /// Audios available to play
     /// </summary>
     private Dictionary<string, AudioSource> audioSources = new Dictionary<string, AudioSource>();
+
+#if UNITY_EDITOR
+    [SerializeField]
+    [Tooltip("EDITOR ONLY")]
+    private int audiosArrayLenght = -1;
+
+    private void OnValidate()
+    {
+        if(audios.Length != audiosArrayLenght)
+        {
+            if (audios.Length > audiosArrayLenght && audiosArrayLenght > 0)
+            {
+                for(int i = audiosArrayLenght - 1; i < audios.Length; i++)
+                {
+                    audios[i].SetPitch(Audio.DEFAULT_VALUE);
+                    audios[i].SetVolume(Audio.DEFAULT_VALUE);
+                }
+            }
+            audiosArrayLenght = audios.Length;
+        }
+    }
+#endif
 
     /// <summary>
     /// Sets instance, and creates and stores all audio sources for Audios array
@@ -33,7 +56,7 @@ public class AudioManager : MonoBehaviour
             Destroy(this);
         }
 
-        foreach(Audio audio in Audios)
+        foreach(Audio audio in audios)
         {
             AudioSource currentSource = gameObject.AddComponent<AudioSource>();
             SetAudioSource(audio, currentSource);
@@ -44,6 +67,7 @@ public class AudioManager : MonoBehaviour
     {
         
     }
+
 
     /// <summary>
     /// Attempts to play the clip by the name given
@@ -134,6 +158,7 @@ public class AudioManager : MonoBehaviour
             audioSources.Add(_audio.Clip.name, _source);
             _source.loop = _audio.IsLoop;
             _source.volume = _audio.Volume;
+            _source.pitch = _audio.Pitch;
             _source.clip = _audio.Clip;
 
             Debug.Log($"{_audio.Clip.name} was added to the sources!");
@@ -148,7 +173,7 @@ public class AudioManager : MonoBehaviour
 [System.Serializable]
 public struct Audio
 {
-    public const float DEFAULT_VOLUME = 1;
+    public const float DEFAULT_VALUE = 1;
 
     [SerializeField]
     private AudioClip clip;
@@ -160,12 +185,18 @@ public struct Audio
     public float Volume => Mathf.Clamp01(volume);
 
     [SerializeField]
+    [Range(-1f, 3f)]
+    private float pitch;
+    public float Pitch => pitch;
+
+    [SerializeField]
     private bool isLoop;
     public bool IsLoop => isLoop;
 
-    public Audio(AudioClip _clip, float _volume, float _spatialBlend, bool _isLoop)
+    public Audio(AudioClip _clip, float _volume, float _pitch, bool _isLoop)
     {
         clip = _clip;
+        pitch = _pitch;
         volume = Mathf.Clamp01(_volume);
         isLoop = _isLoop;
     }
@@ -173,12 +204,18 @@ public struct Audio
     public Audio(AudioClip _clip)
     {
         clip = _clip;
-        volume = DEFAULT_VOLUME;
+        pitch = DEFAULT_VALUE;
+        volume = DEFAULT_VALUE;
         isLoop = false;
     }
 
     public void SetVolume(float _volume)
     {
        volume = Mathf.Clamp01(_volume);
+    }
+
+    public void SetPitch(float _pitch)
+    {
+        pitch = Mathf.Clamp(_pitch, 1f, 3f);
     }
 }

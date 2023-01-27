@@ -12,11 +12,16 @@ public class PlayerRespawn : MonoBehaviour
 
     [Header("Dependencies")]
     [SerializeField]
-    private Transform respawnPoint;
+    private Transform spawnPoint;
     
     public void RespawnPlayer()
     {
         AudioManager.Instance.TryPlayAudio("PlayerRespawn");
-        transform.position = respawnPoint.position;
+        transform.position = spawnPoint.position;
+    }
+
+    public void SetSpawnPoint(Transform _spawnPoint)
+    {
+        spawnPoint = _spawnPoint;
     }
 }

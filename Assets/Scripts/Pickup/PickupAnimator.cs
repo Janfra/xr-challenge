@@ -32,6 +32,7 @@ public class PickupAnimator : MonoBehaviour
 		modelRenderer.enabled = false;
 		idleEffect.Stop();
 		collectEffect.Play();
+		AudioManager.Instance.TryPlayAudio("StarCollected");
 	}
 
 	private void Update()
