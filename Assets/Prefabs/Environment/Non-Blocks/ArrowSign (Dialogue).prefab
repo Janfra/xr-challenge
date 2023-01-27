@@ -107,10 +107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10b92afe94821c34687ad3856e6e8da1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialogueText:
-  - There are some stars on this direction.
-  - Be careful, blocks with no grass will disappear!
-  - Go now!
+  dialogueText: []
   dialogueAlert: {fileID: 272737018}
 --- !u!1001 &3034959350278446098
 PrefabInstance:

@@ -28,6 +28,7 @@ public class DisappearingPlatform : MonoBehaviour
     [SerializeField]
     [Range(0, 31)]
     public int layerSwapIndex = 2;
+
     [SerializeField]
     private UntouchedState untouchedState;
     [SerializeField]
@@ -114,6 +115,8 @@ public class DisappearingPlatform : MonoBehaviour
         private float durationTillFall = 0f;
         private bool isFalling;
 
+        const float INSTANT_FALL_RESET_TIME = 60f;
+
         public override void StartStateLogic(DisappearingPlatform _caller)
         {
             _caller.StartCoroutine(RunStateLogic(_caller));
@@ -161,7 +164,7 @@ public class DisappearingPlatform : MonoBehaviour
             _caller.platformCollider.isTrigger = true;
         }
 
-        /// <summary>
+        /// <summary> 
         /// Logic setting in case of duration of fall not being instant.
         /// </summary>
         /// <param name="_caller"></param>
@@ -171,7 +174,7 @@ public class DisappearingPlatform : MonoBehaviour
         }
 
         /// <summary>
-        /// Sets platform colour depending on duration till fall
+        /// Sets platform colour depending on duration till fall and setup type
         /// </summary>
         public void SetPlatformType(DisappearingPlatform _caller)
         {
@@ -180,6 +183,7 @@ public class DisappearingPlatform : MonoBehaviour
             if(platformType == PlatformTypes.InstantFall)
             {
                 OnSetting = InstantFallSetting;
+                _caller.disappearedState.SetDuration(INSTANT_FALL_RESET_TIME);
             }
             else
             {
@@ -215,8 +219,8 @@ public class DisappearingPlatform : MonoBehaviour
         public enum PlatformTypes 
         {
             InstantFall = 0,
-            QuickFall = 2,
-            NormalFall = 4,
+            QuickFall = 1,
+            NormalFall = 2,
             LongFall = 6,
         }
     }
@@ -284,11 +288,29 @@ public class DisappearingPlatform : MonoBehaviour
         /// <param name="_caller"></param>
         public override void OnSet(DisappearingPlatform _caller)
         {
-            _caller.platformCollider.isTrigger = true;
             initialLayer = _caller.gameObject.layer;
             isRegenerating = false;
             _caller.timer.SetTimer(durationTillRegen);
+
+            // In case the object is already a trigger set the isTriggerEntered to avoid instant pausing
+            if (!_caller.platformCollider.isTrigger)
+            {
+                _caller.platformCollider.isTrigger = true;
+            }
+            else
+            {
+                isTriggerEntered = true;
+            }
+
             StartStateLogic(_caller);
+        }
+
+        public void SetDuration(float _duration)
+        {
+            if(_duration > 0)
+            {
+                durationTillRegen = _duration;
+            }
         }
     }
 
