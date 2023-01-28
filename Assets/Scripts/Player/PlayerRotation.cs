@@ -140,7 +140,7 @@ public class PlayerRotation
     /// <param name="_transform"></param>
     private void GetGamepadRotation(Transform _transform)
     {
-        // Do gamepad rotation logic
+        // Fix rotation to work depending on cam rotation
         Vector3 onPlayerLookAtPosition = lookAtPosition + _transform.position;
         RotateTowardsPoint(onPlayerLookAtPosition, _transform);
         GenerateVisualPoint(onPlayerLookAtPosition, _transform);

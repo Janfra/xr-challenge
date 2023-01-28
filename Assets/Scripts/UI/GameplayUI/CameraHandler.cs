@@ -57,6 +57,11 @@ public class CameraHandler : MonoBehaviour
         SetFollowTarget(playerPosition);
     }
 
+    private void Start()
+    {
+        PlayerRespawn.OnRespawn += CancelTransition;
+    }
+
     private void LateUpdate()
     {
         if(currentFollowTarget != null)
@@ -141,30 +146,50 @@ public class CameraHandler : MonoBehaviour
         return _yPos;
     }
 
+    /// <summary>
+    /// Sets the new facing direction of the camera
+    /// </summary>
+    /// <param name="_direction"></param>
     public void SetFacingDirection(FacingDirection _direction)
     {
         facingDirection = _direction;
-        StartCoroutine(MoveToNewFacingDirection());
+        StartCoroutine(TransitionToNewFacingDirection());
     }
 
-    private IEnumerator MoveToNewFacingDirection()
+    /// <summary>
+    /// Moves the camera position to the new facing direction
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator TransitionToNewFacingDirection()
     {
         if (!isChangingDirection)
         {
             isChangingDirection = true;
             Vector3 targetPosition = GetCameraPositionOnTarget();
 
-            while(transform.position != targetPosition)
+            // Continue as long as not at target pos and still changing
+            while(transform.position != targetPosition && isChangingDirection)
             {
                 targetPosition = GetCameraPositionOnTarget();
                 transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * ROTATION_SPEED);
                 transform.LookAt(currentFollowTarget);
                 yield return null;
             }
+
             isChangingDirection = false;
         }
         yield return null;
     }
+
+    /// <summary>
+    /// Cancels camera transition to new direction
+    /// </summary>
+    private void CancelTransition()
+    {
+        isChangingDirection = false;
+    }
+
+    #region Covering Handling
 
     /// <summary>
     /// Check if any of the selected layers are in between the player and the camera, if so, set them to the culled camera layer.
@@ -208,7 +233,7 @@ public class CameraHandler : MonoBehaviour
     private void AddCoveredObject(GameObject _gameObject)
     {
         coveringObjects.Add(_gameObject);
-        coveringObjectsLayer.Add(_gameObject, _gameObject.layer);
+        coveringObjectsLayer.Add(_gameObject, _gameObject.layer); 
     }
 
     /// <summary>
@@ -217,8 +242,9 @@ public class CameraHandler : MonoBehaviour
     /// <param name="_gameObject"></param>
     private void RemoveCoveredObject(GameObject _gameObject)
     {
+        
         coveringObjects.Remove(_gameObject);
-        if(coveringObjectsLayer.TryGetValue(_gameObject, out int initialLayer))
+        if (coveringObjectsLayer.TryGetValue(_gameObject, out int initialLayer))
         {
             _gameObject.layer = initialLayer;
             coveringObjectsLayer.Remove(_gameObject);
@@ -270,6 +296,47 @@ public class CameraHandler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Check if target position is near a corner
+    /// </summary>
+    /// <returns>True if target is on a corner, otherwise false</returns>
+    private bool IsTargetNearCorner()
+    {
+        // Does not always work, wont add until fully functional
+        const float PROXIMITY_RANGE = 0.2f;
+        float absoluteHorizontalPosition = Mathf.Abs(currentFollowTarget.position.x) + Mathf.Abs(currentFollowTarget.position.z);
+        bool isBelowWithRange = Mathf.Floor(absoluteHorizontalPosition - PROXIMITY_RANGE) < Mathf.Floor(absoluteHorizontalPosition);
+        bool isOverWithRange = Mathf.Floor(absoluteHorizontalPosition + PROXIMITY_RANGE) > Mathf.Floor(absoluteHorizontalPosition);
+
+        return isOverWithRange || isBelowWithRange;
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Get opposite direction of the current direction.
+    /// </summary>
+    /// <returns></returns>
+    private FacingDirection GetOppositeDirection()
+    {
+        // Would use when the cover object is going into the same object several times
+        // May instead use a function that check other directions until one has a true result when raycasting to player, otherwise stay in place or maybe go closer.
+        switch (facingDirection)
+        {
+            case FacingDirection.Up:
+                return FacingDirection.Down;
+            case FacingDirection.Down:
+                return FacingDirection.Up;
+            case FacingDirection.Left:
+                return FacingDirection.Right;
+            case FacingDirection.Right:
+                return FacingDirection.Left;
+            default:
+                break;
+        }
+        return FacingDirection.Up;
+    }
+
     [System.Serializable]
     public enum FacingDirection
     {
@@ -277,5 +344,14 @@ public class CameraHandler : MonoBehaviour
         Down,
         Left,
         Right,
+    }
+
+    private void OnDrawGizmos()
+    {
+        if(currentFollowTarget != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(transform.position, transform.position + (currentFollowTarget.position - transform.position));
+        }
     }
 }

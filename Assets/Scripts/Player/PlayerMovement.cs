@@ -115,6 +115,7 @@ public class PlayerMovement
     /// <returns>Foward movement based on input</returns>
     private Vector3 GetFowardMovementInput()
     {
+        // Fix rotation for gamepad
         float movementMagnitude = playerInput.magnitude;
         Vector3 forwardMove = movementMagnitude * Vector3.forward;
         return forwardMove;
