@@ -30,8 +30,8 @@ public class AppearOnCollected : PickUpSubscriber
 
     private IEnumerator MoveObject()
     {
-        Vector3 initialPos = new Vector3(transform.position.x, transform.position.y - 1, transform.position.z);
-        Vector3 targetPos = transform.position;
+        Vector3 initialPos = new Vector3(appearingObject.transform.position.x, appearingObject.transform.position.y - 1, appearingObject.transform.position.z);
+        Vector3 targetPos = appearingObject.transform.position;
 
         while (!timer.IsTimerDone)
         {

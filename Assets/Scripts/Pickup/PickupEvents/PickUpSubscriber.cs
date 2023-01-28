@@ -39,4 +39,9 @@ public abstract class PickUpSubscriber : MonoBehaviour
             pickupEnabler.OnPickUp += methodRunOnEvent;
         }
     }
+
+    private void OnDestroy()
+    {
+        pickupEnabler.OnPickUp -= methodRunOnEvent;
+    }
 }

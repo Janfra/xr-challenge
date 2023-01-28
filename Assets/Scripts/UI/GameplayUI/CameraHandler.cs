@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,9 +25,14 @@ public class CameraHandler : MonoBehaviour
 
     #region Variables & Constants
 
-    private Transform currentFollowTarget;
+    [Header("Config")]
+    [SerializeField]
+    private FacingDirection facingDirection = FacingDirection.Up;
 
-    private float camHeight;
+    private Transform currentFollowTarget;
+    private bool isChangingDirection;
+
+    private const float ROTATION_SPEED = 10f;
 
     /// <summary>
     /// Distance kept from the cam to objects
@@ -36,7 +42,6 @@ public class CameraHandler : MonoBehaviour
     /// Height difference kept to cam target
     /// </summary>
     private const float MAX_CAM_HEIGHT = 8.5f;
-    private const float MIN_CAM_HEIGHT = 5f;
 
     #endregion
 
@@ -56,18 +61,16 @@ public class CameraHandler : MonoBehaviour
     {
         if(currentFollowTarget != null)
         {
-            FollowTarget();
+            if (!isChangingDirection)
+            {
+                FollowTarget();
+            }
             CheckForCoveringObjects();
         }
         else
         {
             Debug.LogError("No target set for camera");
         }
-    }
-
-    public void ChangeCameraHeight()
-    {
-        Debug.Log(camHeight == MAX_CAM_HEIGHT ? MIN_CAM_HEIGHT : MAX_CAM_HEIGHT);
     }
 
     /// <summary>
@@ -84,19 +87,42 @@ public class CameraHandler : MonoBehaviour
     /// </summary>
     private void FollowTarget()
     {
-        transform.position = GetCameraPositionOnTarget(currentFollowTarget);
+        transform.position = GetCameraPositionOnTarget();
         transform.LookAt(currentFollowTarget);
     }
 
     /// <summary>
-    /// Gets the camera position based on target position
+    /// Gets the camera position based on target position and facing direction
     /// </summary>
     /// <returns>Offset camera position</returns>
-    private Vector3 GetCameraPositionOnTarget(Transform _target)
+    private Vector3 GetCameraPositionOnTarget()
     {
-        Vector3 cameraOffsetPosition = _target.position;
+        Vector3 cameraOffsetPosition = currentFollowTarget.position;
         cameraOffsetPosition.y = YClamp(cameraOffsetPosition.y + MAX_CAM_HEIGHT);
-        cameraOffsetPosition.z -= CAM_DISTANCE;
+
+        switch (facingDirection)
+        {
+            case FacingDirection.Up:
+                cameraOffsetPosition.z -= CAM_DISTANCE;
+                break;
+
+            case FacingDirection.Down:
+                cameraOffsetPosition.z += CAM_DISTANCE;
+
+                break;
+            case FacingDirection.Left:
+                cameraOffsetPosition.x += CAM_DISTANCE;
+
+                break;
+            case FacingDirection.Right:
+                cameraOffsetPosition.x -= CAM_DISTANCE;
+
+                break;
+            default:
+                cameraOffsetPosition.z -= CAM_DISTANCE;
+
+                break;
+        }
 
         return cameraOffsetPosition;
     }
@@ -113,6 +139,31 @@ public class CameraHandler : MonoBehaviour
             return BOTTOM_FLOOR_Y_POS;
         }
         return _yPos;
+    }
+
+    public void SetFacingDirection(FacingDirection _direction)
+    {
+        facingDirection = _direction;
+        StartCoroutine(MoveToNewFacingDirection());
+    }
+
+    private IEnumerator MoveToNewFacingDirection()
+    {
+        if (!isChangingDirection)
+        {
+            isChangingDirection = true;
+            Vector3 targetPosition = GetCameraPositionOnTarget();
+
+            while(transform.position != targetPosition)
+            {
+                targetPosition = GetCameraPositionOnTarget();
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * ROTATION_SPEED);
+                transform.LookAt(currentFollowTarget);
+                yield return null;
+            }
+            isChangingDirection = false;
+        }
+        yield return null;
     }
 
     /// <summary>
@@ -219,4 +270,12 @@ public class CameraHandler : MonoBehaviour
         }
     }
 
+    [System.Serializable]
+    public enum FacingDirection
+    {
+        Up,
+        Down,
+        Left,
+        Right,
+    }
 }

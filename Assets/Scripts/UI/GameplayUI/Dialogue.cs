@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class Dialogues : MonoBehaviour
+public class Dialogue : MonoBehaviour
 {
     private AudioManager audioHandler;
     public static event Action<bool> OnDialogue;
@@ -27,11 +27,19 @@ public class Dialogues : MonoBehaviour
 
     private void Start()
     {
+        if (!dialogueAlert.activeSelf)
+        {
+            dialogueAlert.AddComponent<DialogueMoveOnEnable>();
+        }
+        audioHandler = AudioManager.Instance;
+    }
+
+    private void OnEnable()
+    {
         if (dialogueAlert != null)
         {
             StartCoroutine(MoveAlert());
         }
-        audioHandler = AudioManager.Instance;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -41,7 +49,10 @@ public class Dialogues : MonoBehaviour
             AddInputEvent(input.PlayerInputs);
             if(currentDialogue != dialogueText.Length)
             {
-                dialogueAlert.SetActive(false);
+                if (dialogueAlert)
+                {
+                    dialogueAlert.SetActive(false);
+                }
                 StartCoroutine(StartDialogue());
             }
         }
@@ -158,5 +169,25 @@ public class Dialogues : MonoBehaviour
         nextInput = false;
     }
 
+    private class DialogueMoveOnEnable : MonoBehaviour
+    {
+        [SerializeField]
+        private Dialogue parentDialogue;
 
+        private void OnEnable()
+        {
+            if (parentDialogue)
+            {
+                parentDialogue.MoveAlert();
+            }
+            else
+            {
+                Debug.LogError($"No parent set on {gameObject.name}");
+                if(parentDialogue = GetComponentInParent<Dialogue>())
+                {
+                    parentDialogue.MoveAlert();
+                }
+            }
+        }
+    }
 }

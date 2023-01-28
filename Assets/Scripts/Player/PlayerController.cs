@@ -50,7 +50,7 @@ public class PlayerController : MonoBehaviour
         movementHandler.Init(this);
         rotationHandler.Init(this);
         jumpHandler.Init(playerInputs);
-        Dialogues.OnDialogue += SetControllersEnabled;
+        Dialogue.OnDialogue += SetControllersEnabled;
     }
 
     private void OnEnable()
@@ -75,7 +75,7 @@ public class PlayerController : MonoBehaviour
         jumpHandler.OnDestroy(playerInputs);
         movementHandler.OnDestroy(playerInputs);
         rotationHandler.OnDestroy(playerInputs);
-        Dialogues.OnDialogue -= SetControllersEnabled;
+        Dialogue.OnDialogue -= SetControllersEnabled;
     }
 
     /// <summary>

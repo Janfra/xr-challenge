@@ -38,6 +38,7 @@ public class OnScreenMessage : MonoBehaviour
     private void Awake()
     {
         OnScreenMessagesHandler.SetDependencies(this);
+        onScreenAnimations.SetBool("IsShowing", false);
     }
 
     private void Start()
