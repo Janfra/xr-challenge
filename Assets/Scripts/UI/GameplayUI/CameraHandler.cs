@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class CameraHandler : MonoBehaviour
 {
@@ -25,15 +26,16 @@ public class CameraHandler : MonoBehaviour
 
     #region Variables & Constants
 
+    private Transform currentFollowTarget;
+
     [Header("Config")]
     [SerializeField]
     private FacingDirection facingDirection = FacingDirection.Up;
-
-    private Transform currentFollowTarget;
     private bool isChangingDirection;
+    private Transform camVectorRepresentationOnTarget;
+    private RotationConstraint rotationConstraint;
 
     private const float ROTATION_SPEED = 10f;
-
     /// <summary>
     /// Distance kept from the cam to objects
     /// </summary>
@@ -54,6 +56,7 @@ public class CameraHandler : MonoBehaviour
     {
         coveringObjects = new List<GameObject>();
         coveringObjectsLayer = new Dictionary<GameObject, int>();
+        camVectorRepresentationOnTarget = GenerateVectorRepresentationObject();
         SetFollowTarget(playerPosition);
     }
 
@@ -76,6 +79,45 @@ public class CameraHandler : MonoBehaviour
         {
             Debug.LogError("No target set for camera");
         }
+    }
+
+    /// <summary>
+    /// Creates a game object and constraints its rotation to only copy Y rotation of camera
+    /// </summary>
+    /// <returns>Returns the transform of the gameobject</returns>
+    private Transform GenerateVectorRepresentationObject() 
+    {
+        GameObject obj = new GameObject("Cam Vector Representation On Target");
+        rotationConstraint = obj.AddComponent<RotationConstraint>();
+        rotationConstraint.AddSource(GetRotationContraintSource());
+        rotationConstraint.rotationAxis = Axis.Y;
+        rotationConstraint.constraintActive = true;
+
+        return obj.transform;
+    }
+
+    /// <summary>
+    /// Creates a constraint using the camera as the source
+    /// </summary>
+    /// <returns>Contraint source with the camera</returns>
+    private ConstraintSource GetRotationContraintSource()
+    {
+        ConstraintSource rotationConstraintSource = new ConstraintSource();
+        rotationConstraintSource.sourceTransform = transform;
+        rotationConstraintSource.weight = 1;
+        return rotationConstraintSource;
+    }
+
+    public Vector3 GetCameraForwardOnTarget()
+    {
+        camVectorRepresentationOnTarget.position = currentFollowTarget.position;
+        return camVectorRepresentationOnTarget.forward;
+    }
+
+    public Vector3 GetCameraRightOnTarget()
+    {
+        camVectorRepresentationOnTarget.position = currentFollowTarget.position;
+        return camVectorRepresentationOnTarget.right;
     }
 
     /// <summary>

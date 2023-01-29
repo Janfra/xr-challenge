@@ -5,6 +5,10 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class SpawnPoint : MonoBehaviour
 {
+    [Header("Config")]
+    [SerializeField]
+    private CameraHandler.FacingDirection directionFacedOnRespawn;
+
     private void Awake()
     {
         BoxCollider collider = GetComponent<BoxCollider>();
@@ -15,7 +19,7 @@ public class SpawnPoint : MonoBehaviour
     {
         if(other.TryGetComponent(out PlayerRespawn respawn))
         {
-            respawn.SetSpawnPoint(transform);
+            respawn.SetSpawnPoint(transform, directionFacedOnRespawn);
         }
     }
 }

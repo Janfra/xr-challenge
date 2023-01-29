@@ -89,7 +89,7 @@ public class PlayerController : MonoBehaviour
         {
             jumpHandler.OnUpdate();
             movementHandler.GetInputs();
-            rotationHandler.GetRotation(transform);
+            rotationHandler.GetRotation();
         }
     }
 
@@ -200,5 +200,7 @@ public class PlayerController : MonoBehaviour
         jumpHandler.OnGizmos();
 
         movementHandler.OnGizmos();
+
+        rotationHandler.OnGizmos();
     }
 }

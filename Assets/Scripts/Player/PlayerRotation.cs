@@ -12,6 +12,8 @@ public class PlayerRotation
     /// Camera used for rotation ray casting
     /// </summary>
     private Camera cam;
+    private CameraHandler camRotation;
+    private Transform transform;
 
     #endregion
 
@@ -43,7 +45,7 @@ public class PlayerRotation
     /// <summary>
     /// Delegate to run current type of rotation, cursor or gamepad.
     /// </summary>
-    private Action<Transform> onRotate;
+    private Action onRotate;
 
     /// <summary>
     /// Initializes the class
@@ -51,12 +53,21 @@ public class PlayerRotation
     public void Init(PlayerController _playerController)
     {
         cam = Camera.main;
+        if(cam.TryGetComponent(out CameraHandler cameraHandler))
+        {
+            camRotation = cameraHandler;
+        }
+        else
+        {
+            Debug.LogError("Main camera has no camera handler");
+        }
         if(pointerOnWorld == null)
         {
             Debug.LogWarning("No pointer assigned on player rotation");
         }
 
         DeviceUpdateSetup(_playerController);
+        transform = _playerController.transform;
     }
 
     /// <summary>
@@ -79,7 +90,6 @@ public class PlayerRotation
     {
         if (_isGamepad)
         {
-            Debug.Log("Gamepad is active, set onRotate to Gamepad rotation");
             _inputs.Player.Move.performed += context =>
             {
                 Vector2 moveDirection = context.ReadValue<Vector2>();
@@ -104,11 +114,11 @@ public class PlayerRotation
     /// Runs logic for current type of rotation
     /// </summary>
     /// <param name="_transform">Player to rotate</param>
-    public void GetRotation(Transform _transform)
+    public void GetRotation()
     {
         if(onRotate != null)
         {
-            onRotate.Invoke(_transform);
+            onRotate.Invoke();
         }
         else
         {
@@ -119,14 +129,14 @@ public class PlayerRotation
     /// <summary>
     /// Sets the player rotation using the mouse position
     /// </summary>
-    private void GetCursorRotation(Transform _transform)
+    private void GetCursorRotation()
     {
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, hitOnlyLayers))
         {
             lookAtPosition = hit.point;
-            RotateTowardsPoint(lookAtPosition, _transform);
-            GenerateVisualPoint(lookAtPosition, _transform);
+            RotateTowardsPoint(lookAtPosition);
+            GenerateVisualPoint(lookAtPosition);
         }
         else
         {
@@ -138,24 +148,23 @@ public class PlayerRotation
     /// Sets the player rotation based on movement
     /// </summary>
     /// <param name="_transform"></param>
-    private void GetGamepadRotation(Transform _transform)
+    private void GetGamepadRotation()
     {
-        // Fix rotation to work depending on cam rotation
-        Vector3 onPlayerLookAtPosition = lookAtPosition + _transform.position;
-        RotateTowardsPoint(onPlayerLookAtPosition, _transform);
-        GenerateVisualPoint(onPlayerLookAtPosition, _transform);
+        Vector3 rotationDirection = GetInputDirection();
+        RotateTowardsPoint(rotationDirection);
+        GenerateVisualPoint(rotationDirection);
     }
 
     /// <summary>
     /// Moves world pointer to hit position
     /// </summary>
     /// <param name="_lookAtPosition">Mouse position on world</param>
-    private void GenerateVisualPoint(Vector3 _lookAtPosition, Transform _transform)
+    private void GenerateVisualPoint(Vector3 _lookAtPosition)
     {
         if(pointerOnWorld != null)
         {
             pointerOnWorld.SetActive(true);
-            _lookAtPosition.y = _transform.position.y;
+            _lookAtPosition.y = transform.position.y;
             pointerOnWorld.transform.position = _lookAtPosition;
         }
     }
@@ -176,12 +185,12 @@ public class PlayerRotation
     /// </summary>
     /// <param name="_lookAtPosition">Target position to rotate to</param>
     /// <param name="_transform">Transform to rotate</param>
-    private void RotateTowardsPoint(Vector3 _lookAtPosition, Transform _transform)
+    private void RotateTowardsPoint(Vector3 _lookAtPosition)
     {
-        Vector3 targetPosition = GetRotationDirection(_lookAtPosition, _transform);
+        Vector3 targetPosition = GetRotationDirection(_lookAtPosition);
         // Rotates toward target
         Quaternion rotationTarget = Quaternion.LookRotation(targetPosition);
-        _transform.rotation = Quaternion.RotateTowards(_transform.rotation, rotationTarget, rotationSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, rotationTarget, rotationSpeed * Time.deltaTime);
     }
 
     /// <summary>
@@ -189,10 +198,10 @@ public class PlayerRotation
     /// </summary>
     /// <param name="_lookAtPosition">Target position</param>
     /// <param name="_transform">Player to rotate</param>
-    private void InstantlyRotateToPoint(Vector3 _lookAtPosition, Transform _transform)
+    private void InstantlyRotateToPoint(Vector3 _lookAtPosition)
     {
-        Vector3 targetDirection = GetRotationDirection(_lookAtPosition, _transform);
-        _transform.forward = targetDirection;
+        Vector3 targetDirection = GetRotationDirection(_lookAtPosition);
+        transform.forward = targetDirection;
     }
 
     /// <summary>
@@ -201,10 +210,10 @@ public class PlayerRotation
     /// <param name="_lookAtPosition">Position to point to</param>
     /// <param name="_transform">Player to be rotated</param>
     /// <returns>Vector3 pointing to _lookAtPosition</returns>
-    private Vector3 GetRotationDirection(Vector3 _lookAtPosition, Transform _transform)
+    private Vector3 GetRotationDirection(Vector3 _lookAtPosition)
     {
-        _lookAtPosition.y = _transform.position.y;
-        return _lookAtPosition - _transform.position;
+        _lookAtPosition.y = transform.position.y;
+        return _lookAtPosition - transform.position;
     }
 
     /// <summary>
@@ -219,5 +228,25 @@ public class PlayerRotation
             Vector2 moveDirection = context.ReadValue<Vector2>();
             lookAtPosition = new Vector3(moveDirection.x, 0, moveDirection.y);
         };
+    }
+
+    /// <summary>
+    /// Get the direction of rotation based on camera facing direction and input
+    /// </summary>
+    /// <returns></returns>
+    private Vector3 GetInputDirection()
+    {
+        Vector3 forwardDirection = Mathf.CeilToInt(lookAtPosition.z) * camRotation.GetCameraForwardOnTarget();
+        Vector3 lateralDirection = Mathf.CeilToInt(lookAtPosition.x) * camRotation.GetCameraRightOnTarget();
+        Vector3 resultingDirection = lateralDirection + forwardDirection;
+        resultingDirection.Normalize();
+
+        return resultingDirection + transform.position;
+    }
+
+    public void OnGizmos()
+    {
+        Gizmos.color = Color.white;
+        Gizmos.DrawSphere(GetInputDirection() + transform.position, 1f);
     }
 }

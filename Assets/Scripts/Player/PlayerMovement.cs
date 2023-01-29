@@ -30,7 +30,7 @@ public class PlayerMovement
     private Vector3 movementDirection;
     private Func<Vector3> onGetMovement;
 
-    private const float COLLISION_DECTECTION_DISTANCE_OFFSET = 0.6f;
+    private const float COLLISION_DECTECTION_DISTANCE_OFFSET = 0.4f;
     private const float SIDEWAYS_PENALTY = 2f;
 
     #endregion
@@ -127,7 +127,11 @@ public class PlayerMovement
     /// <returns>Is the player about to run onto a wall</returns>
     private bool IsCollidingWithWall()
     {
-        return Physics.CheckSphere(movementDirection + transform.position, wallCheckSize, wallLayer);
+        Vector3 movementDirectionBasedOnPlayerPos = movementDirection + transform.position;
+
+        bool isWallAtEnd = Physics.CheckSphere(movementDirectionBasedOnPlayerPos, wallCheckSize, wallLayer);
+
+        return isWallAtEnd;
     }
 
     /// <summary>
@@ -153,6 +157,7 @@ public class PlayerMovement
 
     public void OnGizmos()
     {
-        Gizmos.DrawSphere(transform.position + GetRotationOffsetInput() + -transform.up, wallCheckSize);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(transform.position + GetRotationOffsetInput(), wallCheckSize);
     }
 }
