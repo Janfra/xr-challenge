@@ -66,7 +66,7 @@ public class PlayerRotation
     private void DeviceUpdateSetup(PlayerController _playerController)
     {
         bool isGamepad = Gamepad.current != null;
-        OnDeviceUpdated(isGamepad, _playerController.PlayerInputs);
+        OnDeviceUpdated(isGamepad, _playerController.ActionInputs);
         _playerController.OnUpdateInputs += OnDeviceUpdated;
     }
 

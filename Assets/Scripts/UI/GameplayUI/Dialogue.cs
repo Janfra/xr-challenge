@@ -46,7 +46,7 @@ public class Dialogue : MonoBehaviour
     {
         if(other.TryGetComponent(out PlayerController input))
         {
-            AddInputEvent(input.PlayerInputs);
+            AddInputEvent(input.ActionInputs);
             if(currentDialogue != dialogueText.Length)
             {
                 if (dialogueAlert)
@@ -62,7 +62,7 @@ public class Dialogue : MonoBehaviour
     {
         if (other.TryGetComponent(out PlayerController input))
         {
-            RemoveInputEvent(input.PlayerInputs);
+            RemoveInputEvent(input.ActionInputs);
         }
     }
 

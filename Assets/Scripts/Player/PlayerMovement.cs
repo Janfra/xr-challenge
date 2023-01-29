@@ -41,8 +41,8 @@ public class PlayerMovement
         transform = _playerController.transform;
 
         // Subscribe to all relevant events
-        _playerController.PlayerInputs.Player.Move.performed += context => playerInput = context.ReadValue<Vector2>();
-        _playerController.PlayerInputs.Player.Move.canceled += context => playerInput = Vector2.zero;
+        _playerController.ActionInputs.Player.Move.performed += context => playerInput = context.ReadValue<Vector2>();
+        _playerController.ActionInputs.Player.Move.canceled += context => playerInput = Vector2.zero;
 
         DeviceUpdateSetup(_playerController);
     }

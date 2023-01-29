@@ -7,14 +7,14 @@ public class DoubleJumpJewel : MonoBehaviour
 
     #region Components
 
-    private Timer timer;
+    private Timer visualEffectTimer, reactivationTimer;
     private PlayerController player;
 
     #endregion
 
     #region Variables & Constants
+    private static bool isActive;
 
-    private bool isActive;
     private int activeLayerIndex;
     private const float TRANSITION_TIME = 1f;
     private const float OPACITY_ONTAKEN = 0.3f;
@@ -53,18 +53,34 @@ public class DoubleJumpJewel : MonoBehaviour
 
     private void Awake()
     {
-        timer = new Timer();
+        visualEffectTimer = new Timer();
+        reactivationTimer = new Timer();
         activeLayerIndex = gameObject.layer;
         if(meshRenderer == null)
         {
             Debug.LogError($"Please set the jewel renderer in {gameObject.name}!");
             meshRenderer = GetComponentInChildren<Renderer>();
         }
+
+        GameManager.OnGameStateChanged += OnPause;
     }
 
     private void Start()
     {
         audioHandler = AudioManager.Instance;
+    }
+
+    private void OnPause(GameManager.GameStates _newState)
+    {
+        bool isGamePaused = _newState == GameManager.GameStates.Pause;
+        if (!visualEffectTimer.IsTimerDone)
+        {
+            visualEffectTimer.PauseTimer(isGamePaused);
+        }
+        if (!reactivationTimer.IsTimerDone)
+        {
+            reactivationTimer.PauseTimer(isGamePaused);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -97,17 +113,20 @@ public class DoubleJumpJewel : MonoBehaviour
     /// </summary>
     private IEnumerator StartJewelEffect()
     {
-        isActive = true;
-        jewelEffectVisual.SetActive(true);
         audioHandler.TryPlayAudio("JewelPick");
-
-        while (isActive)
+        if (!isActive)
         {
-            player.EnableJumping();
-            SetJewelEffectOnPlayer();
-            yield return null;
+            isActive = true;
+            jewelEffectVisual.SetActive(true);
+
+            while (isActive)
+            {
+                player.EnableJumping();
+                SetJewelEffectOnPlayer();
+                yield return null;
+            }
+            jewelEffectVisual.SetActive(false);
         }
-        jewelEffectVisual.SetActive(false);
     }
 
     /// <summary>
@@ -117,7 +136,6 @@ public class DoubleJumpJewel : MonoBehaviour
     {
         Vector3 jewelPosition = player.transform.position;
         jewelPosition.y += EFFECT_Y_OFFSET;
-
         jewelEffectVisual.transform.position = jewelPosition;
     }
 
@@ -137,7 +155,14 @@ public class DoubleJumpJewel : MonoBehaviour
     /// <returns></returns>
     private IEnumerator StartReactivateTimer()
     {
-        yield return new WaitForSeconds(timeForReactivation);
+        reactivationTimer.SetTimer(timeForReactivation);
+        reactivationTimer.StartTimer(this);
+
+        while (!reactivationTimer.IsTimerDone)
+        {
+            yield return null;
+        }
+
         gameObject.layer = activeLayerIndex;
         StartCoroutine(LerpOverTime(TRANSITION_TIME, OPACITY_ONACTIVE, Vector3.one));
     }
@@ -150,16 +175,16 @@ public class DoubleJumpJewel : MonoBehaviour
     /// <param name="_size">New size of the jewel</param>
     private IEnumerator LerpOverTime(float _duration, float _opacity, Vector3 _size)
     {
-        timer.SetTimer(_duration);
+        visualEffectTimer.SetTimer(_duration);
         float initialOpacity = GetOpacity();
         Vector3 initialSize = transform.localScale;
         yield return null;
 
-        timer.StartTimer(this);
-        while (!timer.IsTimerDone)
+        visualEffectTimer.StartTimer(this);
+        while (!visualEffectTimer.IsTimerDone)
         {
-            transform.localScale = Vector3.Lerp(initialSize, _size, timer.GetTimeNormalized());
-            SetOpacity(Mathf.Lerp(initialOpacity, _opacity, timer.GetTimeNormalized()));
+            transform.localScale = Vector3.Lerp(initialSize, _size, visualEffectTimer.GetTimeNormalized());
+            SetOpacity(Mathf.Lerp(initialOpacity, _opacity, visualEffectTimer.GetTimeNormalized()));
             yield return null;
         }
 

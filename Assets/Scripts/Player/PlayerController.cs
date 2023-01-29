@@ -11,8 +11,8 @@ public class PlayerController : MonoBehaviour
     [Header("Dependencies")]
     [SerializeField]
     private Rigidbody playerRigidbody;
-    private PlayerInputs playerInputs;
-    public PlayerInputs PlayerInputs => playerInputs;
+    private PlayerInputs actionInputs;
+    public PlayerInputs ActionInputs => actionInputs;
 
     #endregion
      
@@ -32,50 +32,52 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        playerInputs = new PlayerInputs();
+        GameManager.OnSetInputs += SetInputs;
+        GameManager.Instance.RequestInputs();
+
         if (playerRigidbody == null)
         {
             playerRigidbody = GetComponent<Rigidbody>();
         }
 
-        playerInputs.UI.Pause.started += context => 
-        {
-            Debug.Log("Paused");
-            PauseHandler();
-        };
+        GameManager.OnGameStateChanged += OnPause;
     }
 
     private void Start()
     {
         movementHandler.Init(this);
         rotationHandler.Init(this);
-        jumpHandler.Init(playerInputs);
+        jumpHandler.Init(actionInputs);
         Dialogue.OnDialogue += SetControllersEnabled;
+    }
+
+    private void SetInputs(PlayerInputs _inputs)
+    {
+        actionInputs = _inputs;
     }
 
     private void OnEnable()
     {
         EnableControllers();
-        playerInputs.Player.Interact.Enable();
-        playerInputs.UI.Enable();
+        actionInputs.Player.Interact.Enable();
         GameManager.OnDeviceUpdate += IsGamepadControlSchemeUsed;
     }
 
     private void OnDisable()
     {
         DisableControllers();
-        playerInputs.Player.Interact.Disable();
-        playerInputs.UI.Disable();
+        actionInputs.Player.Interact.Disable();
         GameManager.OnDeviceUpdate -= IsGamepadControlSchemeUsed;
     }
 
     private void OnDestroy()
     {
-        playerInputs.UI.Pause.started -= context => PauseHandler();
-        jumpHandler.OnDestroy(playerInputs);
-        movementHandler.OnDestroy(playerInputs);
-        rotationHandler.OnDestroy(playerInputs);
+        jumpHandler.OnDestroy(actionInputs);
+        movementHandler.OnDestroy(actionInputs);
+        rotationHandler.OnDestroy(actionInputs);
         Dialogue.OnDialogue -= SetControllersEnabled;
+        GameManager.OnGameStateChanged -= OnPause;
+        GameManager.OnSetInputs -= SetInputs;
     }
 
     /// <summary>
@@ -106,21 +108,19 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Stops player input and all movement
     /// </summary>
-    private void PauseHandler()
+    private void OnPause(GameManager.GameStates _newState)
     {
-        if (GameManager.Instance.CurrentState != GameManager.GameStates.Pause)
+        if (_newState == GameManager.GameStates.Pause)
         {
             SetControllersEnabled(false);
             playerRigidbody.useGravity = false;
             playerRigidbody.Sleep();
-            GameManager.Instance.UpdateState(GameManager.GameStates.Pause);
         }
         else
         {
             SetControllersEnabled(true);
             playerRigidbody.useGravity = true;
             playerRigidbody.WakeUp();
-            GameManager.Instance.UpdateState(GameManager.GameStates.Main);
         }
     }
 
@@ -155,10 +155,17 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void DisableControllers()
     {
-        Debug.Log("Disabled player controllers");
-        playerInputs.Player.Move.Disable();
-        playerInputs.Player.Jumping.Disable();
-        playerInputs.Player.Look.Disable();
+        if (actionInputs != null)
+        {
+            Debug.Log("Disabled player controllers");
+            actionInputs.Player.Move.Disable();
+            actionInputs.Player.Jumping.Disable();
+            actionInputs.Player.Look.Disable();
+        }
+        else
+        {
+            Debug.LogWarning($"Player has no action inputs on destroy!");
+        }
     }
 
     /// <summary>
@@ -166,10 +173,17 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void EnableControllers()
     {
-        Debug.Log("Enabled player controllers");
-        playerInputs.Player.Move.Enable();
-        playerInputs.Player.Jumping.Enable();
-        playerInputs.Player.Look.Enable();
+        if(actionInputs != null)
+        {
+            Debug.Log("Enabled player controllers");
+            actionInputs.Player.Move.Enable();
+            actionInputs.Player.Jumping.Enable();
+            actionInputs.Player.Look.Enable();
+        }
+        else
+        {
+            GameManager.Instance.RequestInputs();
+        }
     }
     
     /// <summary>
@@ -178,7 +192,7 @@ public class PlayerController : MonoBehaviour
     /// <param name="_isGamepad">True if gamepad is currently being used</param>
     private void IsGamepadControlSchemeUsed(bool _isGamepad)
     {
-        OnUpdateInputs(_isGamepad, playerInputs);
+        OnUpdateInputs(_isGamepad, actionInputs);
     }
 
     private void OnDrawGizmos()

@@ -9,12 +9,20 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static event Action<GameStates> OnGameStateChanged;
+
+    /// <summary>
+    /// Called when the game is now using generally relevant inputs 
+    /// </summary>
+    public static event Action<PlayerInputs> OnSetInputs;
+
     /// <summary>
     /// Called when there is a change in input device. 
     /// Bool is for is gamepad being used
     /// </summary>
     public static event Action<bool> OnDeviceUpdate;
     public static GameManager Instance;
+
+    private PlayerInputs inputs;
 
     #region GameStates
 
@@ -46,12 +54,18 @@ public class GameManager : MonoBehaviour
                     scenesForState.Add(scene.sceneState, scene.sceneName);
                 }
             }
+
+            inputs = new PlayerInputs();
+            inputs.UI.Enable();
+            inputs.UI.Pause.started += context =>
+            {
+                UpdateState(GameStates.Pause);
+            };
         }
         else
         {
             Destroy(this);
         }
-
     }
 
     private void Start()
@@ -64,6 +78,15 @@ public class GameManager : MonoBehaviour
     {
         InputSystem.onDeviceChange -= OnDeviceChanged;
         InputUser.onChange -= OnControlSchemeChanged;
+
+        if (inputs != null)
+        {
+            inputs.UI.Disable();
+            inputs.UI.Pause.started -= context =>
+            {
+                UpdateState(GameStates.Pause);
+            };
+        }
     }
 
     #region Game States
@@ -75,22 +98,46 @@ public class GameManager : MonoBehaviour
         switch (currentState)
         {
             case GameStates.Start:
+                inputs.UI.Pause.Disable();
+
                 break;
             case GameStates.Pause:
+                if(pastState == GameStates.Pause)
+                {
+                    Unpaused();
+                }
+
                 break;
             case GameStates.Main:
                 if(pastState != GameStates.Main && pastState != GameStates.Pause)
                 {
                     TryLoadScene(currentState);
                 }
+
                 break;
             case GameStates.End:
+                inputs.UI.Pause.Disable();
+
                 break;
             default:
+                Debug.LogError("State not set in update state");
+
                 break;
         }
 
         OnGameStateChanged?.Invoke(currentState);
+    }
+
+    /// <summary>
+    /// Calls event to send inputs to event listeners, only available at beginning of scene
+    /// </summary>
+    public void RequestInputs()
+    {
+        if (Time.timeSinceLevelLoad < Time.time + 1f)
+        {
+            OnSetInputs?.Invoke(inputs);
+            Debug.Log($"Inputs requested and sent");
+        }
     }
 
     private void TryLoadScene(GameStates _gameState)
@@ -109,6 +156,11 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Started Game");
         UpdateState(GameStates.Main);
+    }
+
+    private void Unpaused()
+    {
+        currentState = GameStates.Main;
     }
 
     public enum GameStates
