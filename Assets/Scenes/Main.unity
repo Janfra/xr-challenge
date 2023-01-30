@@ -4138,6 +4138,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: SpawnPoint (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5386213629147581584, guid: 727502571a649934c8b2aa58902dcca2,
+        type: 3}
+      propertyPath: directionFacedOnRespawn
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 5657545345206610599, guid: 727502571a649934c8b2aa58902dcca2,
         type: 3}
       propertyPath: m_Size.x
