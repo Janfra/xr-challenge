@@ -22,8 +22,19 @@ public class PauseUI : MonoBehaviour
         GameManager.OnGameStateChanged += OnPause;
     }
 
+    private void OnEnable()
+    {
+        if(pauseUIContainer == null)
+        {
+            pauseUIContainer = GetComponentInChildren<GameObject>();
+        }
+    }
+
     private void OnPause(GameManager.GameStates _gameState)
     {
-        pauseUIContainer.SetActive(_gameState == GameManager.GameStates.Pause);
+        if (pauseUIContainer)
+        {
+            pauseUIContainer.SetActive(_gameState == GameManager.GameStates.Pause);
+        }
     }
 }

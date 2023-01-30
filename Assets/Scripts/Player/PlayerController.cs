@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     [Header("Dependencies")]
     [SerializeField]
     private Rigidbody playerRigidbody;
+    public Rigidbody PlayerRigidbody => playerRigidbody;
     private PlayerInputs actionInputs;
     public PlayerInputs ActionInputs => actionInputs;
 
@@ -41,13 +42,30 @@ public class PlayerController : MonoBehaviour
         }
 
         GameManager.OnGameStateChanged += OnPause;
+        GameManager.OnGameStateChanged += UpdateComponents;
+    }
+
+    private void UpdateComponents(GameManager.GameStates _newState)
+    {
+        if(_newState != GameManager.GameStates.Main)
+        {
+            jumpHandler.OnDestroy(actionInputs);
+            movementHandler.OnDestroy(actionInputs);
+            rotationHandler.OnDestroy(actionInputs);
+        } 
+        else if (_newState == GameManager.GameStates.Main)
+        {
+            movementHandler.Init(this);
+            rotationHandler.Init(this);
+            jumpHandler.Init(this);
+        }
     }
 
     private void Start()
     {
         movementHandler.Init(this);
         rotationHandler.Init(this);
-        jumpHandler.Init(actionInputs);
+        jumpHandler.Init(this);
         Dialogue.OnDialogue += SetControllersEnabled;
     }
 
@@ -56,28 +74,52 @@ public class PlayerController : MonoBehaviour
         actionInputs = _inputs;
     }
 
+    /// <summary>
+    /// Resets all components and events
+    /// </summary>
     private void OnEnable()
     {
+        GameManager.OnSetInputs += SetInputs;
+        GameManager.Instance.RequestInputs();
         EnableControllers();
         actionInputs.Player.Interact.Enable();
         GameManager.OnDeviceUpdate += IsGamepadControlSchemeUsed;
-    }
+        GameManager.OnGameStateChanged += OnPause;
 
+        playerRigidbody = GetComponent<Rigidbody>();
+        movementHandler.Init(this);
+        rotationHandler.Init(this);
+        jumpHandler.Init(this);
+    }
+    
+    /// <summary>
+    /// Disables all components and events
+    /// </summary>
     private void OnDisable()
     {
         DisableControllers();
         actionInputs.Player.Interact.Disable();
         GameManager.OnDeviceUpdate -= IsGamepadControlSchemeUsed;
+        GameManager.OnGameStateChanged -= OnPause;
+        jumpHandler.OnDestroy(actionInputs);
+        movementHandler.OnDestroy(actionInputs);
+        rotationHandler.OnDestroy(actionInputs);
     }
 
+    /// <summary>
+    /// Disables all components and events
+    /// </summary>
     private void OnDestroy()
     {
+        DisableControllers();
+        actionInputs.Player.Interact.Disable();
         jumpHandler.OnDestroy(actionInputs);
         movementHandler.OnDestroy(actionInputs);
         rotationHandler.OnDestroy(actionInputs);
         Dialogue.OnDialogue -= SetControllersEnabled;
         GameManager.OnGameStateChanged -= OnPause;
         GameManager.OnSetInputs -= SetInputs;
+        GameManager.OnGameStateChanged -= UpdateComponents;
     }
 
     /// <summary>

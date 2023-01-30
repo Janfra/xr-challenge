@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -39,11 +40,31 @@ public class OnScreenMessage : MonoBehaviour
     {
         OnScreenMessagesHandler.SetDependencies(this);
         onScreenAnimations.SetBool("IsShowing", false);
+        GameManager.OnGameStateChanged += DisableShowing;
+    }
+
+    private void DisableShowing(GameManager.GameStates _newState)
+    {
+        if(_newState == GameManager.GameStates.Main)
+        {
+            onScreenAnimations.SetBool("IsShowing", false);
+        }
     }
 
     private void Start()
     {
         audioHandler = AudioManager.Instance;
+    }
+
+    private void OnEnable()
+    {
+        OnScreenMessagesHandler.SetDependencies(this);
+        onScreenAnimations.SetBool("IsShowing", false);
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.OnGameStateChanged -= DisableShowing;
     }
 
     /// <summary>
@@ -52,6 +73,7 @@ public class OnScreenMessage : MonoBehaviour
     /// <param name="_text">Text to load</param>
     public void SetText(string _text)
     {
+        container.SetActive(true);
         if (!isLoading)
         {
             displayText = _text;

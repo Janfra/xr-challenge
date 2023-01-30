@@ -104,15 +104,16 @@ public class PlayerJump
     /// <summary>
     /// Initializes class
     /// </summary>
-    public void Init(PlayerInputs _inputs)
+    public void Init(PlayerController _playerController)
     {
         if(groundCheck == null)
         {
             Debug.LogError("No ground check assigned on player");
         }
 
-        _inputs.Player.Jumping.canceled += context => StopJumping();
-        _inputs.Player.Jumping.started += context => ResetTimeSinceJump();
+        rigidbody = _playerController.PlayerRigidbody;
+        _playerController.ActionInputs.Player.Jumping.canceled += context => StopJumping();
+        _playerController.ActionInputs.Player.Jumping.started += context => ResetTimeSinceJump();
     }
 
     /// <summary>
@@ -220,9 +221,12 @@ public class PlayerJump
     /// </summary>
     private void StopJumping()
     {
-        if (rigidbody.velocity.y > 0 && !isPlayerOnGround)
+        if (rigidbody)
         {
-            rigidbody.AddForce((1 - jumpCutMultiplier) * rigidbody.velocity.y * Vector3.down, ForceMode.Impulse);
+            if (rigidbody.velocity.y > 0 && !isPlayerOnGround)
+            {
+                rigidbody.AddForce((1 - jumpCutMultiplier) * rigidbody.velocity.y * Vector3.down, ForceMode.Impulse);
+            }
         }
     }
 

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -89,13 +90,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    #region Buttons Functions
 
+    /// <summary>
+    /// Quits the application
+    /// </summary>
     public static void QuitGame()
     {
         Debug.Log("Quit");
         Application.Quit();
     }
 
+    /// <summary>
+    /// Sets the game state to main
+    /// </summary>
     public static void PlayAgain()
     {
         Debug.Log("PlayAgain");
@@ -109,6 +117,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets the game state to start
+    /// </summary>
     public static void BackToMainMenu()
     {
         Debug.Log("BackToMenu");
@@ -121,6 +132,10 @@ public class GameManager : MonoBehaviour
             Debug.LogError("No instance set");
         }
     }
+
+    /// <summary>
+    /// Sets the game state to main 
+    /// </summary>
     public static void ResumeGame()
     {
         if (Instance != null)
@@ -133,7 +148,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets the game state to main
+    /// </summary>
+    public static void OnStartGame()
+    {
+        if (Instance != null)
+        {
+            Debug.Log("Started Game");
+            Instance.UpdateState(GameStates.Main);
+        }
+    }
+
+    #endregion
+
     #region Game States
+
+    /// <summary>
+    /// Updates the game state to the given state and runs any basic logic
+    /// </summary>
+    /// <param name="_gameState">New game state</param>
     public void UpdateState(GameStates _gameState)
     {
         GameStates pastState = currentState;
@@ -146,7 +180,11 @@ public class GameManager : MonoBehaviour
                 if(pastState != GameStates.Start)
                 {
                     TryLoadScene(currentState);
-                    ButtonUI.OnGetSelectedButton().Select();
+                    Button selectedButton = ButtonUI.OnGetSelectedButton();
+                    if (selectedButton)
+                    {
+                        selectedButton.Select();
+                    }
                 }
 
                 break;
@@ -157,11 +195,16 @@ public class GameManager : MonoBehaviour
                 }
                 else if(currentState == GameStates.Pause)
                 {
-                    ButtonUI.OnGetSelectedButton().Select();
+                    Button selectedButton = ButtonUI.OnGetSelectedButton();
+                    if (selectedButton)
+                    {
+                        selectedButton.Select();
+                    }
                 }
 
                 break;
             case GameStates.Main:
+                inputs.UI.Pause.Enable();
                 if(pastState != GameStates.Main && pastState != GameStates.Pause)
                 {
                     TryLoadScene(currentState);
@@ -206,15 +249,6 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogError("State scene not found!");
-        }
-    }
-
-    public static void OnStartGame()
-    {
-        if(Instance != null)
-        {
-            Debug.Log("Started Game");
-            Instance.UpdateState(GameStates.Main);
         }
     }
 

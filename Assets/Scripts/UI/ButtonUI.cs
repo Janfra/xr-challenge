@@ -76,6 +76,11 @@ public class ButtonUI : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointe
 
     private void OnEnable()
     {
+        if (isSelected)
+        {
+            markedAsSelectedButton = button;
+        }
+
         if (EventSystem.current.currentSelectedGameObject == button)
         {
             button.Select();
