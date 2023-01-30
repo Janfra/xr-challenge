@@ -209,10 +209,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void OnStartGame()
+    public static void OnStartGame()
     {
-        Debug.Log("Started Game");
-        UpdateState(GameStates.Main);
+        if(Instance != null)
+        {
+            Debug.Log("Started Game");
+            Instance.UpdateState(GameStates.Main);
+        }
     }
 
     private void Unpaused()
