@@ -241,7 +241,6 @@ public class PlayerRotation
         Vector3 resultingDirection = lateralDirection + forwardDirection;
         resultingDirection.Normalize();
 
-        Debug.Log(resultingDirection);
         return resultingDirection + transform.position;
     }
 

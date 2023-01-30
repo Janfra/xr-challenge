@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class Dialogue : MonoBehaviour
 {
-    private AudioManager audioHandler;
+    protected AudioManager audioHandler;
     public static event Action<bool> OnDialogue;
 
     #region Config
 
     [Header("Config")]
     [SerializeField]
-    private string[] dialogueText;
+    protected string[] dialogueText;
     [SerializeField]
     private GameObject dialogueAlert;
 
@@ -19,15 +19,15 @@ public class Dialogue : MonoBehaviour
 
     #region Variables & Constants
 
-    private bool nextInput = false;
-    private int currentDialogue = 0;
+    protected bool nextInput = false;
+    protected int currentDialogue = 0;
     private const float ALERT_Y_MOVEMENT = 0.3f;
 
     #endregion
 
     private void Start()
     {
-        if (!dialogueAlert.activeSelf)
+        if (dialogueAlert != null && !dialogueAlert.activeSelf)
         {
             dialogueAlert.AddComponent<DialogueMoveOnEnable>();
         }
@@ -44,18 +44,7 @@ public class Dialogue : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.TryGetComponent(out PlayerController input))
-        {
-            AddInputEvent(input.ActionInputs);
-            if(currentDialogue != dialogueText.Length)
-            {
-                if (dialogueAlert)
-                {
-                    dialogueAlert.SetActive(false);
-                }
-                StartCoroutine(StartDialogue());
-            }
-        }
+        OnColliderStartDialogue(other);
     }
 
     private void OnTriggerExit(Collider other)
@@ -66,11 +55,27 @@ public class Dialogue : MonoBehaviour
         }
     }
 
+    protected void OnColliderStartDialogue(Collider _other)
+    {
+        if (_other.TryGetComponent(out PlayerController input))
+        {
+            AddInputEvent(input.ActionInputs);
+            if (currentDialogue != dialogueText.Length)
+            {
+                if (dialogueAlert)
+                {
+                    dialogueAlert.SetActive(false);
+                }
+                StartCoroutine(StartDialogue());
+            }
+        }
+    }
+
     /// <summary>
     /// Starts dialogue sequence
     /// </summary>
     /// <returns></returns>
-    private IEnumerator StartDialogue()
+    protected virtual IEnumerator StartDialogue()
     {
         OnDialogue?.Invoke(false);
 
@@ -130,6 +135,11 @@ public class Dialogue : MonoBehaviour
             dialogueAlert.transform.position = Vector3.Lerp(firstPos, secondPos, Mathf.Clamp01(time));
             yield return null;
         }
+    }
+
+    protected void StartOnDialogueEvent(bool _isFinished)
+    {
+        OnDialogue?.Invoke(_isFinished);
     }
 
     /// <summary>
