@@ -48,3 +48,5 @@ MonoBehaviour:
     sceneName: Start
   - sceneState: 2
     sceneName: Main
+  - sceneState: 3
+    sceneName: EndScore

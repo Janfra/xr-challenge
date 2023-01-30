@@ -41,12 +41,18 @@ public class RocketEndArea : MonoBehaviour
     {
         if(other.TryGetComponent(out PickupSystem playerPickup) && AreAllPickupsCollected())
         {
-            Debug.Log("Game completed!");
-            OnScreenMessagesHandler.SetScreenMessage("Game Completed!");
+            GameManager.Instance.UpdateState(GameManager.GameStates.End);
         }
         else if (!AreAllPickupsCollected())
         {
-            OnScreenMessagesHandler.SetScreenMessage($"You still need to collect {pickupsSubscribedTo.Count - pickupsCollectedCount} stars!");
+            if(pickupsCollectedCount == pickupsSubscribedTo.Count - 1)
+            {
+                OnScreenMessagesHandler.SetScreenMessage($"Did you forget to pickup the star on top of the rocket?!");
+            }
+            else
+            {
+                OnScreenMessagesHandler.SetScreenMessage($"You still need to collect {pickupsSubscribedTo.Count - pickupsCollectedCount} stars!");
+            }
         }
     }
 

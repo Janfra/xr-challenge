@@ -89,6 +89,50 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+    public static void QuitGame()
+    {
+        Debug.Log("Quit");
+        Application.Quit();
+    }
+
+    public static void PlayAgain()
+    {
+        Debug.Log("PlayAgain");
+        if (Instance != null)
+        {
+            Instance.UpdateState(GameStates.Main);
+        }
+        else
+        {
+            Debug.LogError("No instance set");
+        }
+    }
+
+    public static void BackToMainMenu()
+    {
+        Debug.Log("BackToMenu");
+        if (Instance != null)
+        {
+            Instance.UpdateState(GameStates.Start);
+        }
+        else
+        {
+            Debug.LogError("No instance set");
+        }
+    }
+    public static void ResumeGame()
+    {
+        if (Instance != null)
+        {
+            Instance.UpdateState(GameStates.Main);
+        }
+        else
+        {
+            Debug.LogError("No instance set on game manager");
+        }
+    }
+
     #region Game States
     public void UpdateState(GameStates _gameState)
     {
@@ -99,12 +143,21 @@ public class GameManager : MonoBehaviour
         {
             case GameStates.Start:
                 inputs.UI.Pause.Disable();
+                if(pastState != GameStates.Start)
+                {
+                    TryLoadScene(currentState);
+                    ButtonUI.OnGetSelectedButton().Select();
+                }
 
                 break;
             case GameStates.Pause:
                 if(pastState == GameStates.Pause)
                 {
                     Unpaused();
+                }
+                else if(currentState == GameStates.Pause)
+                {
+                    ButtonUI.OnGetSelectedButton().Select();
                 }
 
                 break;
@@ -117,6 +170,10 @@ public class GameManager : MonoBehaviour
                 break;
             case GameStates.End:
                 inputs.UI.Pause.Disable();
+                if(pastState != GameStates.End)
+                {
+                    TryLoadScene(currentState);
+                }
 
                 break;
             default:

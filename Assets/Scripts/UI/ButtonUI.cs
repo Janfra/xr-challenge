@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,7 +11,7 @@ public class ButtonUI : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointe
     [SerializeField]
     private Button button;
     [SerializeField]
-    private Text text;
+    private TextMeshProUGUI text;
     [SerializeField]
     private RectTransform selectionPointer;
 
@@ -23,10 +24,26 @@ public class ButtonUI : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointe
     private Color deselectTextColour;
     [SerializeField]
     private Color selectTextColour;
+    [SerializeField]
+    private bool isSelected;
 
     #endregion
 
+    [SerializeField]
+    private static Button markedAsSelectedButton;
     private const float DESELECT_OPACITY = 0.3f;
+
+    private void OnValidate()
+    {
+        if (isSelected && markedAsSelectedButton != button)
+        {
+            markedAsSelectedButton = button;
+        }
+        else if (!isSelected && markedAsSelectedButton == button)
+        {
+            button = null;
+        }
+    }
 
     private void Awake()
     {
@@ -37,8 +54,8 @@ public class ButtonUI : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointe
         }
         if(text == null)
         {
-            text = GetComponentInChildren<Text>();
-            Debug.LogError($"No text set in {gameObject.name}!");
+            text = GetComponentInChildren<TextMeshProUGUI>();
+            Debug.LogError($"No text set in {gameObject.name}!");   
         }
         if(selectionPointer == null)
         {
@@ -50,6 +67,19 @@ public class ButtonUI : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointe
         SelectTextColourClamp();
         SetPointerMiddleLeftAnchor();
         button.onClick.AddListener(OnButtonClicked);
+
+        if (isSelected)
+        {
+            markedAsSelectedButton = button;
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (EventSystem.current.currentSelectedGameObject == button)
+        {
+            button.Select();
+        }
     }
 
     /// <summary>
@@ -137,5 +167,10 @@ public class ButtonUI : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointe
     private void OnButtonClicked()
     {
         AudioManager.Instance.TryPlayAudio("ButtonClick");
+    }
+
+    public static Button OnGetSelectedButton()
+    {
+        return markedAsSelectedButton;
     }
 }
