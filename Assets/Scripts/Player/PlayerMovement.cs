@@ -129,9 +129,9 @@ public class PlayerMovement
     {
         Vector3 movementDirectionBasedOnPlayerPos = movementDirection + transform.position;
 
-        bool isWallAtEnd = Physics.CheckSphere(movementDirectionBasedOnPlayerPos, wallCheckSize, wallLayer);
+        bool isWallInDirection = Physics.CheckSphere(movementDirectionBasedOnPlayerPos, wallCheckSize, wallLayer);
 
-        return isWallAtEnd;
+        return isWallInDirection;
     }
 
     /// <summary>

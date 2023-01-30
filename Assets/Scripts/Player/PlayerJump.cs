@@ -37,6 +37,8 @@ public class PlayerJump
 
     #endregion
 
+    private const float MAX_FALLING_SPEED = -12f;
+
     #endregion
 
     #region Dependencies
@@ -120,6 +122,18 @@ public class PlayerJump
     {
         UpdateJumpBuffer();
         IsPlayerOnGroundUpdate();
+        ClampFallingSpeed();
+    }
+    
+    /// <summary>
+    /// Clamps the rigidbody velocity when falling
+    /// </summary>
+    private void ClampFallingSpeed()
+    {
+        if(rigidbody.velocity.y < MAX_FALLING_SPEED)
+        {
+            rigidbody.velocity = new Vector3(0, MAX_FALLING_SPEED, 0);
+        }
     }
 
     /// <summary>
@@ -145,6 +159,9 @@ public class PlayerJump
             landMarkCanvas.gameObject.SetActive(false);
             timeSinceGrounded = coyoteTime;
             OnGrounded?.Invoke();
+
+            // Temporary fix for ocassional velocity added when landing. Would have to change it if using rigidbody for movement
+            rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, 0);
         }
         else
         {
@@ -195,7 +212,7 @@ public class PlayerJump
     {
         TimeSinceJump = 0;
         timeDelayToJump = JUMP_DELAY;
-        rigidbody.velocity = new Vector3(rigidbody.velocity.x, 0, rigidbody.velocity.z);
+        rigidbody.velocity = new Vector3(0, 0, 0);
     }
 
     /// <summary>

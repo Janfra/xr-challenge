@@ -236,17 +236,21 @@ public class PlayerRotation
     /// <returns></returns>
     private Vector3 GetInputDirection()
     {
-        Vector3 forwardDirection = Mathf.CeilToInt(lookAtPosition.z) * camRotation.GetCameraForwardOnTarget();
-        Vector3 lateralDirection = Mathf.CeilToInt(lookAtPosition.x) * camRotation.GetCameraRightOnTarget();
+        Vector3 forwardDirection = lookAtPosition.z * camRotation.GetCameraForwardOnTarget();
+        Vector3 lateralDirection = lookAtPosition.x * camRotation.GetCameraRightOnTarget();
         Vector3 resultingDirection = lateralDirection + forwardDirection;
         resultingDirection.Normalize();
 
+        Debug.Log(resultingDirection);
         return resultingDirection + transform.position;
     }
 
     public void OnGizmos()
     {
-        Gizmos.color = Color.white;
-        Gizmos.DrawSphere(GetInputDirection() + transform.position, 1f);
+        if(camRotation != null)
+        {
+            Gizmos.color = Color.white;
+            Gizmos.DrawSphere(GetInputDirection() + transform.position, 1f);
+        }
     }
 }
