@@ -45,6 +45,10 @@ public class PlayerController : MonoBehaviour
         GameManager.OnGameStateChanged += UpdateComponents;
     }
 
+    /// <summary>
+    /// Initialize or run on destroy event depending on state
+    /// </summary>
+    /// <param name="_newState"></param>
     private void UpdateComponents(GameManager.GameStates _newState)
     {
         if(_newState != GameManager.GameStates.Main)

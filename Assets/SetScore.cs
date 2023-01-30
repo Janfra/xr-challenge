@@ -9,6 +9,9 @@ public class SetScore : MonoBehaviour
     [SerializeField]
     TextMeshProUGUI text;
 
+    /// <summary>
+    /// Set the score text
+    /// </summary>
     private void Start()
     {
         text.text = $"{PickupSystem.score}";

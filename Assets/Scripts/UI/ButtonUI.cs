@@ -169,11 +169,18 @@ public class ButtonUI : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointe
         selectionPointer.gameObject.SetActive(false);   
     }
 
+    /// <summary>
+    /// On click play audio
+    /// </summary>
     private void OnButtonClicked()
     {
         AudioManager.Instance.TryPlayAudio("ButtonClick");
     }
 
+    /// <summary>
+    /// Get button marked as selected on inspector
+    /// </summary>
+    /// <returns></returns>
     public static Button OnGetSelectedButton()
     {
         return markedAsSelectedButton;

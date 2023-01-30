@@ -10,6 +10,10 @@ public class EndDialogue : Dialogue
 
     Transform playerTransform;
 
+    /// <summary>
+    /// Start dialogue and stores the player transform
+    /// </summary>
+    /// <param name="other"></param>
     private void OnTriggerEnter(Collider other)
     {
         if(other.TryGetComponent(out PlayerController playerController))
@@ -19,6 +23,10 @@ public class EndDialogue : Dialogue
         OnColliderStartDialogue(other);
     }
 
+    /// <summary>
+    /// Teleports player after normal dialogue
+    /// </summary>
+    /// <returns></returns>
     protected override IEnumerator StartDialogue()
     {
         StartOnDialogueEvent(false);

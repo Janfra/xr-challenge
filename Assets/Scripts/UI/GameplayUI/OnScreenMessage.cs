@@ -43,6 +43,10 @@ public class OnScreenMessage : MonoBehaviour
         GameManager.OnGameStateChanged += DisableShowing;
     }
 
+    /// <summary>
+    /// Sets to now showing if current state is not main
+    /// </summary>
+    /// <param name="_newState"></param>
     private void DisableShowing(GameManager.GameStates _newState)
     {
         if(_newState == GameManager.GameStates.Main)

@@ -137,6 +137,10 @@ public class Dialogue : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Runs the On Dialogue event
+    /// </summary>
+    /// <param name="_isFinished">True if dialogue is finished, otherwise false</param>
     protected void StartOnDialogueEvent(bool _isFinished)
     {
         OnDialogue?.Invoke(_isFinished);
